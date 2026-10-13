@@ -80,6 +80,9 @@ const maxQuantity = 1000;
 // A rectangle around Sri Lanka, the same one the API uses.
 const minLatitude = 5.5, maxLatitude = 10.0, minLongitude = 79.4, maxLongitude = 82.0;
 
+bool insideSriLanka(double latitude, double longitude) =>
+    latitude >= minLatitude && latitude <= maxLatitude && longitude >= minLongitude && longitude <= maxLongitude;
+
 /// The same rules the API enforces, checked on the phone first so the person gets an instant,
 /// specific message. The API still checks everything again: this is a convenience, not security.
 /// Returns field name -> message. An empty map means the form is fine.
@@ -103,8 +106,7 @@ Map<String, String> validateDraft(RequestDraft d, DateTime now) {
   }
 
   final where = d.effectiveLocation;
-  if (where != null &&
-      (where.latitude < minLatitude || where.latitude > maxLatitude || where.longitude < minLongitude || where.longitude > maxLongitude)) {
+  if (where != null && !insideSriLanka(where.latitude, where.longitude)) {
     errors['location'] = 'The location is outside Sri Lanka. Choose your district instead.';
   }
 

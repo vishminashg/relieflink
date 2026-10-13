@@ -71,9 +71,17 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
       final here = await context.read<LocationService>().current();
       if (mounted) {
         setState(() {
-          _draft.latitude = here.latitude;
-          _draft.longitude = here.longitude;
-          _locationMessage = 'Your location will be sent with the request.';
+          if (insideSriLanka(here.latitude, here.longitude)) {
+            _draft.latitude = here.latitude;
+            _draft.longitude = here.longitude;
+            _locationMessage = 'Your location will be sent with the request.';
+          } else {
+            // A position outside Sri Lanka is never kept: the request falls back to the district centre,
+            // so the person is not stuck with a form that cannot be sent.
+            _draft.latitude = null;
+            _draft.longitude = null;
+            _locationMessage = 'Your phone is outside Sri Lanka, so we will use the centre of your district instead.';
+          }
         });
       }
     } on LocationUnavailable catch (e) {

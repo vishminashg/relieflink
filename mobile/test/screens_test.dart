@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:relieflink_mobile/data/districts.dart';
+import 'package:relieflink_mobile/logic/request_form.dart';
 
 import 'support/fakes.dart';
 
@@ -287,6 +288,20 @@ void main() {
       final body = app.server.calls.firstWhere((c) => c.method == 'POST').body as Map;
       expect(body['latitude'], 6.2);
       expect(body['longitude'], 80.1);
+    });
+
+    testWidgets('a phone position outside Sri Lanka is not kept, so the request can still be sent', (tester) async {
+      final app = await openForm(tester,
+          extra: {'POST /api/relief-requests': (_) => requestJson()}, location: FakeLocation(point: (latitude: 37.4, longitude: -122.1)));
+      await tapText(tester, 'Use my current location');
+      expect(find.textContaining('outside Sri Lanka, so we will use the centre'), findsOneWidget);
+      await tapText(tester, 'Water');
+      await chooseDistrict(tester, 'Colombo');
+      await tester.enterText(find.byKey(const Key('address')), 'Panadura town');
+      await tapText(tester, 'Send request');
+      final body = app.server.calls.firstWhere((c) => c.method == 'POST').body as Map;
+      expect(body['latitude'], isNot(37.4)); // the district centre was sent instead
+      expect(body['latitude'], inInclusiveRange(minLatitude, maxLatitude));
     });
 
     testWidgets('if location is not available the person is told what to do instead', (tester) async {
