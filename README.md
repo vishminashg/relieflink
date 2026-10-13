@@ -60,6 +60,9 @@ cd web && cp .env.example .env.local && npm ci && npm run dev    # http://localh
 ```
 Sign in with the coordinator or admin demo account. Details: [web/README.md](web/README.md).
 
+## Run the mobile app
+Flutter 3.47 and an Android emulator or phone. The installable APK is built by CI: see [mobile/README.md](mobile/README.md).
+
 ## Run the tests
 The integration tests use a real PostgreSQL server. Each run creates a uniquely named database, applies the real EF Core migrations, and drops it afterwards.
 
