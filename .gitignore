@@ -1,0 +1,39 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+appsettings.Development.json
+appsettings.Local.json
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+*.pem
+secrets.json
+
+# Node / React
+node_modules/
+web/dist/
+web/.vite/
+
+# Python agent service
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins*
+mobile/.packages
+*.apk
+*.aab
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store

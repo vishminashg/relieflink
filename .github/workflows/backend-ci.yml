@@ -1,0 +1,53 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: relieflink
+          POSTGRES_PASSWORD: ci_password_only
+          POSTGRES_DB: relieflink_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U relieflink"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      ConnectionStrings__TestDb: Host=localhost;Port=5432;Database=relieflink_test;Username=relieflink;Password=ci_password_only
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore api/ReliefLink.sln
+
+      - name: Build
+        run: dotnet build api/ReliefLink.sln --no-restore -c Release
+
+      - name: Test
+        run: dotnet test api/ReliefLink.sln --no-build -c Release --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/test-results.trx"
