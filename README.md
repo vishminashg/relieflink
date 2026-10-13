@@ -54,6 +54,12 @@ uvicorn app.main:app_factory --factory --port 8001
 ```
 Details: [agents/README.md](agents/README.md). With the API and the agent service both running, `python scripts/e2e_smoke.py --password <Seed__DemoPassword>` walks one request through the whole workflow.
 
+## Run the web console
+```bash
+cd web && cp .env.example .env.local && npm ci && npm run dev    # http://localhost:5173
+```
+Sign in with the coordinator or admin demo account. Details: [web/README.md](web/README.md).
+
 ## Run the tests
 The integration tests use a real PostgreSQL server. Each run creates a uniquely named database, applies the real EF Core migrations, and drops it afterwards.
 
