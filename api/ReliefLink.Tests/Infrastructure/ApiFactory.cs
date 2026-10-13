@@ -1,9 +1,12 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using ReliefLink.Api.Data;
+using ReliefLink.Api.Services;
 
 namespace ReliefLink.Tests.Infrastructure;
 
@@ -32,6 +35,19 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         Environment.SetEnvironmentVariable("Database__MigrateOnStartup", "true");
         Environment.SetEnvironmentVariable("Seed__Enabled", "true");
         Environment.SetEnvironmentVariable("Seed__DemoPassword", DemoPassword);
+    }
+
+    /// <summary>The fake agent service. Tests script it per request; by default it returns a correct plan.</summary>
+    public ScriptedPlanner Planner { get; } = new();
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Tests never call a real AI service: they must be fast, free and give the same answer every time.
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IPlannerClient>();
+            services.AddSingleton<IPlannerClient>(Planner);
+        });
     }
 
     public async Task InitializeAsync()
