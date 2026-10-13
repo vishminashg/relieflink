@@ -1,0 +1,50 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**", ".github/workflows/mobile-ci.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["mobile/**", ".github/workflows/mobile-ci.yml"]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.6
+          cache: true
+
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      # The address the installed app talks to. Set a repository variable called API_URL
+      # (Settings > Secrets and variables > Actions > Variables) once the API is deployed.
+      - name: Build APK
+        run: flutter build apk --release --dart-define=API_URL=${{ vars.API_URL || 'http://10.0.2.2:5039' }}
+
+      - name: Keep the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: relieflink-android-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
