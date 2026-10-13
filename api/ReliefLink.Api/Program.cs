@@ -25,6 +25,7 @@ builder.Services.Configure<JwtOptions>(jwtSection);
 
 // ---- Services ----
 builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 
