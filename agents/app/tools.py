@@ -53,12 +53,48 @@ def deadline_pressure(needed_by: datetime | None, now: datetime) -> dict[str, An
     return {"hoursRemaining": round(hours, 1), "band": band}
 
 
+def find_volunteers(candidates: list[dict[str, Any]], required_skills: list[str], target_district: str) -> dict[str, Any]:
+    """Filters candidate volunteers based on required skills and district."""
+    qualified = []
+    for c in candidates:
+        cand_skills = set(c.get("skills", []))
+        has_req = all(s in cand_skills for s in required_skills)
+        same_district = c.get("district", "").lower() == target_district.lower()
+        qualified.append({
+            "id": c["id"],
+            "name": c.get("name", ""),
+            "district": c.get("district", ""),
+            "skills": c.get("skills", []),
+            "satisfiesAllRequired": has_req,
+            "sameDistrict": same_district,
+            "isVerified": c.get("is_verified", False),
+            "completedAssignments": c.get("completed_assignments", 0)
+        })
+    qualified.sort(key=lambda x: (x["satisfiesAllRequired"], x["sameDistrict"], x["completedAssignments"]), reverse=True)
+    return {"candidates": qualified, "total": len(qualified)}
+
+
+def volunteer_roster_summary(selected_ids: list[str], candidates: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarizes coverage across selected volunteers."""
+    cand_by_id = {c["id"]: c for c in candidates}
+    skills_covered = set()
+    districts = set()
+    for vid in selected_ids:
+        if vid in cand_by_id:
+            skills_covered.update(cand_by_id[vid].get("skills", []))
+            districts.add(cand_by_id[vid].get("district", ""))
+    return {"selectedCount": len(selected_ids), "skillsCovered": sorted(list(skills_covered)), "districts": sorted(list(districts))}
+
+
 ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "triage_breakdown": triage_breakdown,
     "need_priority_order": need_priority_order,
     "vulnerability_summary": vulnerability_summary,
     "deadline_pressure": deadline_pressure,
+    "find_volunteers": find_volunteers,
+    "volunteer_roster_summary": volunteer_roster_summary,
 }
+
 
 
 class ToolBox:

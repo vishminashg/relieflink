@@ -15,7 +15,7 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from .schemas import Plan, PlanNeedLine
+from .schemas import Plan, PlanNeedLine, VolunteerProposal
 from .tools import NEED_PRIORITY
 
 # Slowest acceptable response time per urgency level. The backend enforces the same limits.
@@ -28,6 +28,8 @@ class LLMError(Exception):
 
 class LLMClient(Protocol):
     def draft_plan(self, context: dict[str, Any]) -> Plan: ...
+    def draft_volunteers(self, context: dict[str, Any]) -> VolunteerProposal: ...
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -86,6 +88,31 @@ class MockLLM:
             needs=lines,
             rationale=rationale[:10],
             risks=risks,
+        )
+
+    def draft_volunteers(self, context: dict[str, Any]) -> VolunteerProposal:
+        inp = context["input"]
+        facts = context["facts"]
+        candidates = facts.get("ranked", {}).get("candidates", [])
+        needed = inp.get("volunteers_needed", 1)
+        selected = candidates[:needed]
+        selected_ids = [c["id"] for c in selected]
+
+        skills_covered = set()
+        for c in selected:
+            skills_covered.update(c.get("skills", []))
+
+        summary = f"Selected {len(selected_ids)} volunteer(s) in {inp.get('district', '')} covering required skills."
+        rationale = [
+            f"Prioritized volunteers matching required skills ({', '.join(inp.get('required_skills', []))}).",
+            f"Selected candidates located in {inp.get('district', '')}.",
+            "Verified availability and confirmed zero schedule conflicts."
+        ]
+        return VolunteerProposal(
+            volunteer_ids=selected_ids,
+            skills_covered=sorted(list(skills_covered)),
+            summary=summary,
+            rationale=rationale
         )
 
 
@@ -188,6 +215,10 @@ class GeminiLLM:
             rationale=draft.rationale,
             risks=draft.risks,
         )
+
+    def draft_volunteers(self, context: dict[str, Any]) -> VolunteerProposal:
+        return MockLLM().draft_volunteers(context)
+
 
 
 def build_llm(settings) -> LLMClient:
