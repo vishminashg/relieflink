@@ -29,6 +29,11 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 
+// The Python agent service is internal: it is only called from here, with a shared service key.
+builder.Services.Configure<AgentOptions>(builder.Configuration.GetSection(AgentOptions.SectionName));
+builder.Services.AddHttpClient<IPlannerClient, HttpPlannerClient>();
+builder.Services.AddScoped<WorkflowOrchestrator>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddProblemDetails();
