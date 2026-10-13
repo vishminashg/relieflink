@@ -85,6 +85,9 @@ public class ToolCall : BaseEntity
     public Guid StepId { get; set; }
     public WorkflowStep? Step { get; set; }
 
+    /// <summary>Order in which the agent used its tools (1, 2, 3 ...).</summary>
+    public int Sequence { get; set; }
+
     public string ToolName { get; set; } = string.Empty;
     public string? ArgumentsJson { get; set; }
     public string? ResultJson { get; set; }
@@ -96,6 +99,9 @@ public class ValidationResult : BaseEntity
 {
     public Guid WorkflowId { get; set; }
     public AgentWorkflow? Workflow { get; set; }
+
+    /// <summary>Which planning attempt this check belongs to (1 for the first plan, 2 after a retry or revision, ...).</summary>
+    public int Attempt { get; set; } = 1;
 
     public string CheckName { get; set; } = string.Empty;
     public bool Passed { get; set; }
