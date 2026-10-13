@@ -156,6 +156,151 @@ namespace ReliefLink.Api.Data.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AddressText")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ChildrenCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<int>("ElderlyCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("HomeFlooded")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("HouseholdSize")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("NeededBy")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("RequesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("TriageReasonsJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("TriageScore")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Urgency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("UrgencyOverridden")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UrgencyOverrideReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("District");
+
+                    b.HasIndex("RequesterId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Urgency");
+
+                    b.ToTable("ReliefRequests", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ReliefRequests_Counts", "\"ElderlyCount\" >= 0 AND \"ChildrenCount\" >= 0 AND \"ElderlyCount\" + \"ChildrenCount\" <= \"HouseholdSize\"");
+
+                            t.HasCheckConstraint("CK_ReliefRequests_HouseholdSize", "\"HouseholdSize\" BETWEEN 1 AND 50");
+
+                            t.HasCheckConstraint("CK_ReliefRequests_Latitude", "\"Latitude\" BETWEEN -90 AND 90");
+
+                            t.HasCheckConstraint("CK_ReliefRequests_Longitude", "\"Longitude\" BETWEEN -180 AND 180");
+
+                            t.HasCheckConstraint("CK_ReliefRequests_TriageScore", "\"TriageScore\" BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequestItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ReliefRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReliefRequestId", "Category")
+                        .IsUnique();
+
+                    b.ToTable("ReliefRequestItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ReliefRequestItems_Quantity", "\"Quantity\" BETWEEN 1 AND 1000");
+                        });
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ToolCall", b =>
                 {
                     b.Property<Guid>("Id")
@@ -349,6 +494,11 @@ namespace ReliefLink.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ReliefLink.Api.Domain.ReliefRequest", null)
+                        .WithMany()
+                        .HasForeignKey("ReliefRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("CreatedBy");
                 });
 
@@ -369,6 +519,28 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("DecidedBy");
 
                     b.Navigation("Workflow");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.User", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Requester");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequestItem", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.ReliefRequest", "ReliefRequest")
+                        .WithMany("Items")
+                        .HasForeignKey("ReliefRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReliefRequest");
                 });
 
             modelBuilder.Entity("ReliefLink.Api.Domain.ToolCall", b =>
@@ -411,6 +583,11 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("Steps");
 
                     b.Navigation("Validations");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("ReliefLink.Api.Domain.WorkflowStep", b =>
