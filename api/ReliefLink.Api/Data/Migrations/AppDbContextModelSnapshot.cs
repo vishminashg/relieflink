@@ -72,7 +72,10 @@ namespace ReliefLink.Api.Data.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("ReliefRequestId");
+                    b.HasIndex("ReliefRequestId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AgentWorkflows_ActivePerRequest")
+                        .HasFilter("\"Status\" IN ('Submitted','Planning','Proposed','Validating','PendingCoordinatorApproval','Approved','RevisionRequested')");
 
                     b.HasIndex("Status");
 
@@ -319,6 +322,9 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Property<string>("ResultJson")
                         .HasColumnType("jsonb");
 
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("StepId")
                         .HasColumnType("uuid");
 
@@ -398,6 +404,11 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Attempt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("CheckName")
                         .IsRequired()

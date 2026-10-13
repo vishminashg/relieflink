@@ -45,6 +45,15 @@ Demo accounts (created only when `Seed__Enabled=true`; password is whatever you 
 | Volunteer | volunteer@relieflink.lk |
 | Citizen | citizen@relieflink.lk |
 
+## Run the AI agent service (needed for the relief workflow)
+```bash
+cd agents && pip install -r requirements-dev.txt
+export AGENT_SERVICE_KEY="$(openssl rand -hex 24)" LLM_MODE=mock
+uvicorn app.main:app_factory --factory --port 8001
+# then start the API with  Agent__BaseUrl=http://localhost:8001  Agent__ServiceKey=<same key>
+```
+Details: [agents/README.md](agents/README.md). With the API and the agent service both running, `python scripts/e2e_smoke.py --password <Seed__DemoPassword>` walks one request through the whole workflow.
+
 ## Run the tests
 The integration tests use a real PostgreSQL server. Each run creates a uniquely named database, applies the real EF Core migrations, and drops it afterwards.
 
@@ -52,6 +61,8 @@ The integration tests use a real PostgreSQL server. Each run creates a uniquely 
 export ConnectionStrings__TestDb="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=YOUR_PASSWORD"
 dotnet test api/ReliefLink.sln
 ```
+
+Agent service tests: `cd agents && pytest`.
 
 ## Adding a migration (each student does this for their own component)
 ```bash
