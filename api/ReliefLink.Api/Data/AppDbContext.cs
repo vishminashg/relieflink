@@ -3,7 +3,7 @@ using ReliefLink.Api.Domain;
 
 namespace ReliefLink.Api.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<AgentWorkflow> AgentWorkflows => Set<AgentWorkflow>();
@@ -100,6 +100,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(x => x.CreatedAt);
             e.HasIndex(x => new { x.EntityType, x.EntityId });
         });
+
+        // Each component keeps its mapping in Data/Configurations/*.cs; they are all picked up here.
+        b.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
