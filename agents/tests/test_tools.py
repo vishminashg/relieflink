@@ -8,8 +8,16 @@ from app.tools import ALLOWED_TOOLS, ToolBox, ToolNotAllowed, deadline_pressure,
 NOW = datetime(2026, 10, 14, 8, 0, tzinfo=timezone.utc)
 
 
-def test_allow_list_is_exactly_these_four_read_only_tools():
-    assert set(ALLOWED_TOOLS) == {"triage_breakdown", "need_priority_order", "vulnerability_summary", "deadline_pressure"}
+def test_allow_list_is_exactly_these_read_only_tools():
+    assert set(ALLOWED_TOOLS) == {
+        "triage_breakdown",
+        "need_priority_order",
+        "vulnerability_summary",
+        "deadline_pressure",
+        "find_volunteers",
+        "volunteer_roster_summary",
+    }
+
 
 
 def test_tool_outside_the_allow_list_is_refused_and_not_recorded():
