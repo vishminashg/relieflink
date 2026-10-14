@@ -16,6 +16,8 @@ Status: shared foundation complete (auth, roles, workflow state, tests, CI). Com
 
 Design baseline: [docs/00-scope-and-design.md](docs/00-scope-and-design.md)
 
+Deployment: [docs/deployment.md](docs/deployment.md). Android app install: [docs/apk-install.md](docs/apk-install.md).
+
 ## Run the API locally
 Prerequisites: .NET 8 SDK, PostgreSQL 14+.
 
