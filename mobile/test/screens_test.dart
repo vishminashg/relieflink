@@ -79,7 +79,8 @@ void main() {
 
     testWidgets('volunteers see their own placeholder, not the citizen list', (tester) async {
       await pump(tester, await TestApp.create({}, role: 'Volunteer'));
-      expect(find.textContaining('Volunteer tasks will appear here'), findsOneWidget);
+      expect(find.text('Field Missions'), findsOneWidget);
+      expect(find.text('Missions'), findsOneWidget);
       expect(find.text('Ask for help'), findsNothing);
     });
 
