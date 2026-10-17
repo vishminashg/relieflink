@@ -33,9 +33,16 @@ public class AssignmentsController(AppDbContext db, IAuditService audit, TimePro
         var staffUserId = User.GetUserId();
         if (staffUserId is null) return Unauthorized();
 
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        // Serialize assignment decisions for the same volunteer across coordinators.
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT pg_advisory_xact_lock(hashtextextended({input.VolunteerId.ToString()}, 0))", ct);
+
         var volunteer = await db.Volunteers
             .Include(v => v.User)
             .Include(v => v.Assignments)
+            .Include(v => v.Availabilities)
             .FirstOrDefaultAsync(v => v.Id == input.VolunteerId, ct);
 
         if (volunteer is null)
@@ -46,6 +53,13 @@ public class AssignmentsController(AppDbContext db, IAuditService audit, TimePro
 
         var startUtc = input.StartTime.ToUniversalTime();
         var endUtc = input.EndTime.ToUniversalTime();
+
+        if (!VolunteerMatcher.IsWindowCoveredByAvailability(volunteer.Availabilities, startUtc, endUtc))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Volunteer availability does not cover this time window.");
+        }
 
         // Enforce Strict No Double-Booking Invariant
         var activeAssignments = volunteer.Assignments
@@ -86,6 +100,7 @@ public class AssignmentsController(AppDbContext db, IAuditService audit, TimePro
         audit.Record(staffUserId.Value, "assignment.created", nameof(VolunteerAssignment), assignment.Id.ToString(),
             new { volunteer.Id, startUtc, endUtc, input.ReliefRequestId });
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
 
         var loaded = await LoadAsync(assignment.Id, ct);
         return CreatedAtAction(nameof(GetById), new { id = assignment.Id }, VolunteerAssignmentDto.From(loaded!));
