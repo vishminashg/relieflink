@@ -7,7 +7,7 @@ The Planner agent's tools. Rules that keep the agent safe:
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
 from .schemas import ToolCallRecord
@@ -74,6 +74,59 @@ def find_volunteers(candidates: list[dict[str, Any]], required_skills: list[str]
     return {"candidates": qualified, "total": len(qualified)}
 
 
+def check_volunteer_availability(
+    volunteer_id: str,
+    start_time: datetime,
+    end_time: datetime,
+    availability_windows: list[dict[str, Any]] | None = None,
+    assignments: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Checks supplied schedule facts without accessing a database or making writes."""
+    if end_time <= start_time:
+        return {"volunteerId": volunteer_id, "available": False, "conflicts": ["invalid-time-window"]}
+
+    conflicts: list[str] = []
+    for assignment in assignments or []:
+        assignment_start = _parse_datetime(assignment.get("startTime"))
+        assignment_end = _parse_datetime(assignment.get("endTime"))
+        if assignment_start is None or assignment_end is None:
+            continue
+        if start_time < assignment_end + TRANSIT_BUFFER and assignment_start < end_time + TRANSIT_BUFFER:
+            conflicts.append(f"assignment:{assignment.get('id', 'unknown')}")
+
+    windows = availability_windows or []
+    covered = not windows or any(
+        (window_start := _parse_datetime(window.get("specificStartUtc"))) is not None
+        and (window_end := _parse_datetime(window.get("specificEndUtc"))) is not None
+        and window_start <= start_time
+        and window_end >= end_time
+        for window in windows
+    )
+    if not covered:
+        conflicts.append("availability-window")
+
+    return {
+        "volunteerId": volunteer_id,
+        "available": not conflicts,
+        "conflicts": conflicts,
+    }
+
+
+def _parse_datetime(value: Any) -> datetime | None:
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+    return None
+
+
+TRANSIT_BUFFER = timedelta(minutes=30)
+
+
 def volunteer_roster_summary(selected_ids: list[str], candidates: list[dict[str, Any]]) -> dict[str, Any]:
     """Summarizes coverage across selected volunteers."""
     cand_by_id = {c["id"]: c for c in candidates}
@@ -92,6 +145,7 @@ ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "vulnerability_summary": vulnerability_summary,
     "deadline_pressure": deadline_pressure,
     "find_volunteers": find_volunteers,
+    "check_volunteer_availability": check_volunteer_availability,
     "volunteer_roster_summary": volunteer_roster_summary,
 }
 

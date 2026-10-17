@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from app.tools import ALLOWED_TOOLS, ToolBox, ToolNotAllowed, deadline_pressure, need_priority_order, \
-    triage_breakdown, vulnerability_summary
+    check_volunteer_availability, triage_breakdown, vulnerability_summary
 
 NOW = datetime(2026, 10, 14, 8, 0, tzinfo=timezone.utc)
 
@@ -15,6 +15,7 @@ def test_allow_list_is_exactly_these_read_only_tools():
         "vulnerability_summary",
         "deadline_pressure",
         "find_volunteers",
+        "check_volunteer_availability",
         "volunteer_roster_summary",
     }
 
@@ -89,6 +90,40 @@ def test_deadline_bands(hours, band):
 
 def test_no_deadline():
     assert deadline_pressure(None, NOW) == {"hoursRemaining": None, "band": "none"}
+
+
+def test_check_volunteer_availability_rejects_assignment_inside_transit_buffer():
+    result = check_volunteer_availability(
+        "vol-1",
+        NOW,
+        NOW + timedelta(hours=2),
+        assignments=[{
+            "id": "assignment-1",
+            "startTime": (NOW + timedelta(hours=2, minutes=15)).isoformat(),
+            "endTime": (NOW + timedelta(hours=4)).isoformat(),
+        }],
+    )
+
+    assert result == {
+        "volunteerId": "vol-1",
+        "available": False,
+        "conflicts": ["assignment:assignment-1"],
+    }
+
+
+def test_check_volunteer_availability_rejects_window_outside_specific_availability():
+    result = check_volunteer_availability(
+        "vol-2",
+        NOW,
+        NOW + timedelta(hours=3),
+        availability_windows=[{
+            "specificStartUtc": NOW.isoformat(),
+            "specificEndUtc": (NOW + timedelta(hours=2)).isoformat(),
+        }],
+    )
+
+    assert result["available"] is False
+    assert result["conflicts"] == ["availability-window"]
 
 
 def test_a_deadline_without_timezone_is_treated_as_utc():
