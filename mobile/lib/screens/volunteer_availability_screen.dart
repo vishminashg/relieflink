@@ -10,10 +10,12 @@ class VolunteerAvailabilityScreen extends StatefulWidget {
   const VolunteerAvailabilityScreen({super.key});
 
   @override
-  State<VolunteerAvailabilityScreen> createState() => _VolunteerAvailabilityScreenState();
+  State<VolunteerAvailabilityScreen> createState() =>
+      _VolunteerAvailabilityScreenState();
 }
 
-class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScreen> {
+class _VolunteerAvailabilityScreenState
+    extends State<VolunteerAvailabilityScreen> {
   VolunteerProfile? _profile;
   ApiException? _error;
   bool _loading = true;
@@ -61,10 +63,15 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
               children: [
                 DropdownButtonFormField<String>(
                   initialValue: type,
-                  decoration: const InputDecoration(labelText: 'Availability Type'),
+                  decoration:
+                      const InputDecoration(labelText: 'Availability Type'),
                   items: const [
-                    DropdownMenuItem(value: 'RecurringWeekly', child: Text('Recurring Weekly')),
-                    DropdownMenuItem(value: 'SpecificDate', child: Text('Specific Date Window')),
+                    DropdownMenuItem(
+                        value: 'RecurringWeekly',
+                        child: Text('Recurring Weekly')),
+                    DropdownMenuItem(
+                        value: 'SpecificDate',
+                        child: Text('Specific Date Window')),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => type = val);
@@ -76,8 +83,16 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                     initialValue: selectedDay,
                     decoration: const InputDecoration(labelText: 'Day of Week'),
                     items: const [
-                      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-                    ].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                      'Monday',
+                      'Tuesday',
+                      'Wednesday',
+                      'Thursday',
+                      'Friday',
+                      'Saturday',
+                      'Sunday'
+                    ]
+                        .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                        .toList(),
                     onChanged: (val) {
                       if (val != null) setDialogState(() => selectedDay = val);
                     },
@@ -88,8 +103,11 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: ctx, initialTime: startTime);
-                            if (picked != null) setDialogState(() => startTime = picked);
+                            final picked = await showTimePicker(
+                                context: ctx, initialTime: startTime);
+                            if (picked != null) {
+                              setDialogState(() => startTime = picked);
+                            }
                           },
                           child: Text('Start: ${startTime.format(ctx)}'),
                         ),
@@ -98,8 +116,11 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: ctx, initialTime: endTime);
-                            if (picked != null) setDialogState(() => endTime = picked);
+                            final picked = await showTimePicker(
+                                context: ctx, initialTime: endTime);
+                            if (picked != null) {
+                              setDialogState(() => endTime = picked);
+                            }
                           },
                           child: Text('End: ${endTime.format(ctx)}'),
                         ),
@@ -116,9 +137,12 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 90)),
                       );
-                      if (picked != null) setDialogState(() => specificDate = picked);
+                      if (picked != null) {
+                        setDialogState(() => specificDate = picked);
+                      }
                     },
-                    label: Text('Date: ${specificDate.day}/${specificDate.month}/${specificDate.year}'),
+                    label: Text(
+                        'Date: ${specificDate.day}/${specificDate.month}/${specificDate.year}'),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -126,8 +150,11 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: ctx, initialTime: startTime);
-                            if (picked != null) setDialogState(() => startTime = picked);
+                            final picked = await showTimePicker(
+                                context: ctx, initialTime: startTime);
+                            if (picked != null) {
+                              setDialogState(() => startTime = picked);
+                            }
                           },
                           child: Text('Start: ${startTime.format(ctx)}'),
                         ),
@@ -136,8 +163,11 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: ctx, initialTime: endTime);
-                            if (picked != null) setDialogState(() => endTime = picked);
+                            final picked = await showTimePicker(
+                                context: ctx, initialTime: endTime);
+                            if (picked != null) {
+                              setDialogState(() => endTime = picked);
+                            }
                           },
                           child: Text('End: ${endTime.format(ctx)}'),
                         ),
@@ -149,8 +179,12 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Add Slot')),
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Add Slot')),
           ],
         ),
       ),
@@ -158,7 +192,8 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
 
     if (confirmed == true && mounted) {
       final current = _profile!.availabilities.map((a) => a.toJson()).toList();
-      String fmtTime(TimeOfDay t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
+      String fmtTime(TimeOfDay t) =>
+          '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
 
       if (type == 'RecurringWeekly') {
         current.add({
@@ -168,8 +203,10 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
           'endTime': fmtTime(endTime),
         });
       } else {
-        final startDt = DateTime.utc(specificDate.year, specificDate.month, specificDate.day, startTime.hour, startTime.minute);
-        final endDt = DateTime.utc(specificDate.year, specificDate.month, specificDate.day, endTime.hour, endTime.minute);
+        final startDt = DateTime.utc(specificDate.year, specificDate.month,
+            specificDate.day, startTime.hour, startTime.minute);
+        final endDt = DateTime.utc(specificDate.year, specificDate.month,
+            specificDate.day, endTime.hour, endTime.minute);
         current.add({
           'type': 'SpecificDate',
           'specificStartUtc': startDt.toIso8601String(),
@@ -178,11 +215,14 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
       }
 
       try {
-        await context.read<ApiClient>().updateVolunteerAvailability(_profile!.id, current);
+        await context
+            .read<ApiClient>()
+            .updateVolunteerAvailability(_profile!.id, current);
         _load();
       } on ApiException catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: critical, content: Text(e.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(backgroundColor: critical, content: Text(e.message)));
         }
       }
     }
@@ -190,13 +230,19 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
 
   Future<void> _deleteSlot(String id) async {
     if (_profile == null) return;
-    final updated = _profile!.availabilities.where((a) => a.id != id).map((a) => a.toJson()).toList();
+    final updated = _profile!.availabilities
+        .where((a) => a.id != id)
+        .map((a) => a.toJson())
+        .toList();
     try {
-      await context.read<ApiClient>().updateVolunteerAvailability(_profile!.id, updated);
+      await context
+          .read<ApiClient>()
+          .updateVolunteerAvailability(_profile!.id, updated);
       _load();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: critical, content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(backgroundColor: critical, content: Text(e.message)));
       }
     }
   }
@@ -207,14 +253,16 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addSlot,
         icon: const Icon(Icons.add),
-        label: const Text('Add Availability', style: TextStyle(fontWeight: FontWeight.w700)),
+        label: const Text('Add Availability',
+            style: TextStyle(fontWeight: FontWeight.w700)),
       ),
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
           children: [
-            Text('My Duty Availability', style: Theme.of(context).textTheme.headlineSmall),
+            Text('My Duty Availability',
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 6),
             const Text(
               'Set when you can respond to disasters. The AI and coordinator matching engine will only dispatch you during compatible windows.',
@@ -223,11 +271,14 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
             const SizedBox(height: 16),
             if (_error != null) ErrorBox(error: _error!, onRetry: _load),
             if (_loading && _profile == null)
-              const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator()))
+              const Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Center(child: CircularProgressIndicator()))
             else if (_profile != null && _profile!.availabilities.isEmpty)
               const _EmptyAvailability()
             else ...[
-              for (final a in _profile?.availabilities ?? const <VolunteerAvailabilityModel>[])
+              for (final a in _profile?.availabilities ??
+                  const <VolunteerAvailabilityModel>[])
                 Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   elevation: 0,
@@ -279,7 +330,8 @@ class _EmptyAvailability extends StatelessWidget {
         ),
         child: const Column(
           children: [
-            Text('No availability windows set.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Text('No availability windows set.',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             SizedBox(height: 6),
             Text(
               'Tap "Add Availability" to specify days and times when you are free for emergency dispatch.',
