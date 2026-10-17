@@ -18,6 +18,16 @@ Design baseline: [docs/00-scope-and-design.md](docs/00-scope-and-design.md)
 
 Deployment: [docs/deployment.md](docs/deployment.md). Android app install: [docs/apk-install.md](docs/apk-install.md).
 
+## Live system (Component A)
+| Part | Address |
+|---|---|
+| API | https://relieflink-api.onrender.com (health: `/api/health`, docs: `/swagger`) |
+| Planner agent | https://relieflink-agent.onrender.com (health: `/health`) |
+| Android app | [app-release.apk](https://github.com/vishminashg/relieflink/releases/download/v1.0-componentA/app-release.apk) ([release page](https://github.com/vishminashg/relieflink/releases/tag/v1.0-componentA)) |
+| Database | Neon PostgreSQL (private) |
+
+The free hosting sleeps after about 15 minutes without traffic. Open the two health addresses first and wait up to a minute, then use the app. Demo sign-in accounts are created by the seeder (`citizen@relieflink.lk`, `coordinator@relieflink.lk`, `volunteer@relieflink.lk`, `admin@relieflink.lk`). The demo password is set in the host settings and is given to the marker separately, not stored in this repository.
+
 ## Run the API locally
 Prerequisites: .NET 8 SDK, PostgreSQL 14+.
 

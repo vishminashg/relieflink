@@ -1,6 +1,10 @@
 # Install the ReliefLink Android app
 
-## Build the APK
+## Download the APK
+The built file is attached to the GitHub release: https://github.com/vishminashg/relieflink/releases/download/v1.0-componentA/app-release.apk
+(https://github.com/vishminashg/relieflink/releases/tag/v1.0-componentA)
+
+## Or build it yourself
 Prerequisites: Flutter SDK, Android SDK (Android Studio installs both).
 
 ```bash
