@@ -10,7 +10,7 @@ class Settings:
     service_key: str
     llm_mode: str = "mock"            # "mock" (default, no key needed) or "gemini"
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash"
     llm_timeout_seconds: int = 20
     mock_fault: str = "none"          # testing/demo only: none | drop_need_first_attempt | lower_urgency
 
@@ -20,7 +20,7 @@ class Settings:
             service_key=os.environ.get("AGENT_SERVICE_KEY", "dev-agent-service-key-0123456789"),
             llm_mode=os.environ.get("LLM_MODE", "mock").strip().lower(),
             gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
-            gemini_model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+            gemini_model=os.environ.get("GEMINI_MODEL", "gemini-3.5-flash"),
             llm_timeout_seconds=int(os.environ.get("LLM_TIMEOUT_SECONDS", "20")),
             mock_fault=os.environ.get("MOCK_FAULT", "none").strip().lower(),
         )
