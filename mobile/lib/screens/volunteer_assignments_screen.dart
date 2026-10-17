@@ -139,23 +139,23 @@ class _VolunteerAssignmentsScreenState
       ),
     );
 
-    if (confirmed == true) {
-      final reason = controller.text.trim();
-      try {
-        await context.read<ApiClient>().cancelAssignment(
-            a.id, reason.isNotEmpty ? reason : 'Volunteer withdrew');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Assignment cancelled.')),
-          );
-        }
-        _load();
-      } on ApiException catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: critical, content: Text(e.message)),
-          );
-        }
+    if (confirmed != true || !mounted) return;
+
+    final reason = controller.text.trim();
+    try {
+      await context.read<ApiClient>().cancelAssignment(
+          a.id, reason.isNotEmpty ? reason : 'Volunteer withdrew');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Assignment cancelled.')),
+        );
+      }
+      _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: critical, content: Text(e.message)),
+        );
       }
     }
   }

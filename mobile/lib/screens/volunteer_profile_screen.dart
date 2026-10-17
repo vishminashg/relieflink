@@ -76,7 +76,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<String>(
-                  value: sriLankaDistricts.contains(district) ? district : sriLankaDistricts.first,
+                  initialValue: sriLankaDistricts.contains(district) ? district : sriLankaDistricts.first,
                   decoration: const InputDecoration(labelText: 'Base District'),
                   items: sriLankaDistricts.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
                   onChanged: (val) {
@@ -162,7 +162,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<String>(
-                  value: skill,
+                  initialValue: skill,
                   decoration: const InputDecoration(labelText: 'Skill Category'),
                   items: volunteerSkillsList
                       .map((s) => DropdownMenuItem(value: s, child: Text(s)))
@@ -173,7 +173,7 @@ class _VolunteerProfileScreenState extends State<VolunteerProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: proficiency,
+                  initialValue: proficiency,
                   decoration: const InputDecoration(labelText: 'Proficiency Level'),
                   items: const ['Beginner', 'Intermediate', 'Advanced', 'Expert']
                       .map((p) => DropdownMenuItem(value: p, child: Text(p)))

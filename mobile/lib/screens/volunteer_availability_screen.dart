@@ -60,7 +60,7 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<String>(
-                  value: type,
+                  initialValue: type,
                   decoration: const InputDecoration(labelText: 'Availability Type'),
                   items: const [
                     DropdownMenuItem(value: 'RecurringWeekly', child: Text('Recurring Weekly')),
@@ -73,7 +73,7 @@ class _VolunteerAvailabilityScreenState extends State<VolunteerAvailabilityScree
                 const SizedBox(height: 12),
                 if (type == 'RecurringWeekly') ...[
                   DropdownButtonFormField<String>(
-                    value: selectedDay,
+                    initialValue: selectedDay,
                     decoration: const InputDecoration(labelText: 'Day of Week'),
                     items: const [
                       'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
