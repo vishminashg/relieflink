@@ -32,6 +32,7 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 // The Python agent service is internal: it is only called from here, with a shared service key.
 builder.Services.Configure<AgentOptions>(builder.Configuration.GetSection(AgentOptions.SectionName));
 builder.Services.AddHttpClient<IPlannerClient, HttpPlannerClient>();
+builder.Services.AddHttpClient<IVolunteerAgentClient, HttpVolunteerAgentClient>();
 builder.Services.AddScoped<WorkflowOrchestrator>();
 
 builder.Services.AddControllers()
