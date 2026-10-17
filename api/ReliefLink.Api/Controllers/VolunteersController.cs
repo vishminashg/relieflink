@@ -16,7 +16,11 @@ namespace ReliefLink.Api.Controllers;
 [ApiController]
 [Route("api/volunteers")]
 [Authorize]
-public class VolunteersController(AppDbContext db, IAuditService audit, TimeProvider clock) : ControllerBase
+public class VolunteersController(
+    AppDbContext db,
+    IAuditService audit,
+    TimeProvider clock,
+    IVolunteerAgentClient volunteerAgent) : ControllerBase
 {
     private bool IsStaff => User.IsInRole(Roles.Coordinator) || User.IsInRole(Roles.Admin);
 
@@ -354,6 +358,91 @@ public class VolunteersController(AppDbContext db, IAuditService audit, TimeProv
             .ToList();
 
         return Ok(scored);
+    }
+
+    // ---------- AI Matching Proposal (Staff, read-only) ----------
+    [HttpPost("agent-match")]
+    [Authorize(Roles = Roles.Staff)]
+    public async Task<IActionResult> AgentMatch([FromBody] VolunteerAgentMatchInput input, CancellationToken ct)
+    {
+        if (input.VolunteersNeeded is < 1 or > 20)
+            return ValidationProblem(new ValidationProblemDetails(
+                new Dictionary<string, string[]> { [nameof(input.VolunteersNeeded)] = ["VolunteersNeeded must be between 1 and 20."] }));
+
+        var startUtc = input.StartTime.ToUniversalTime();
+        var endUtc = input.EndTime.ToUniversalTime();
+        if (endUtc <= startUtc)
+            return ValidationProblem(new ValidationProblemDetails(
+                new Dictionary<string, string[]> { [nameof(input.EndTime)] = ["EndTime must be after StartTime."] }));
+
+        var targetDistrict = SriLanka.CanonicalDistrict(input.District) ?? string.Empty;
+        var requiredSkills = input.RequiredSkills ?? [];
+        var candidates = await db.Volunteers
+            .Where(v => v.IsActive)
+            .Include(v => v.User)
+            .Include(v => v.Skills)
+            .Include(v => v.Availabilities)
+            .Include(v => v.Assignments)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var agentInput = new VolunteerMatchingAgentInput(
+            input.RequestId,
+            targetDistrict,
+            requiredSkills.Select(s => s.ToString()).ToList(),
+            startUtc,
+            endUtc,
+            input.VolunteersNeeded,
+            candidates.Select(v => new VolunteerAgentCandidate(
+                v.Id,
+                v.User?.FullName ?? "Volunteer",
+                v.District,
+                v.Skills.Select(s => s.Skill.ToString()).ToList(),
+                v.Skills.Any(s => s.IsVerified),
+                v.Assignments.Count(a => a.Status == AssignmentStatus.Completed),
+                v.Availabilities
+                    .Where(a => a.Type == AvailabilityType.SpecificDate)
+                    .Select(a => new VolunteerAgentAvailability(a.SpecificStartUtc, a.SpecificEndUtc))
+                    .ToList(),
+                v.Assignments
+                    .Where(a => AssignmentStatusRules.IsActive(a.Status))
+                    .Select(a => new VolunteerAgentAssignment(a.Id, a.StartTime, a.EndTime))
+                    .ToList()))
+            .ToList(),
+            input.Notes);
+
+        VolunteerAgentResponse response;
+        try
+        {
+            response = await volunteerAgent.MatchAsync(agentInput, ct);
+        }
+        catch (PlannerUnavailableException ex)
+        {
+            return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
+                title: "Volunteer matching agent is unavailable.", detail: ex.Message);
+        }
+
+        var volunteersById = candidates.ToDictionary(v => v.Id);
+        var checks = VolunteerMatcher.ValidateProposal(
+            response.Proposal.VolunteerIds,
+            volunteersById,
+            requiredSkills,
+            input.VolunteersNeeded,
+            startUtc,
+            endUtc,
+            response.Proposal.Summary);
+
+        var userId = User.GetUserId();
+        if (userId is not null)
+            audit.Record(userId.Value, "volunteer.agent_proposal", nameof(Volunteer), input.RequestId.ToString(),
+                new { checks = checks.Select(c => new { c.Name, c.Passed }) });
+
+        return Ok(new
+        {
+            proposal = response.Proposal,
+            checks,
+            toolCalls = response.ToolCalls ?? []
+        });
     }
 
     // ---------- Summary Metrics (Staff Dashboard) ----------

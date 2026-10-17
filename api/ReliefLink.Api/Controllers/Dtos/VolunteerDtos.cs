@@ -100,6 +100,15 @@ public record VolunteerMatchResultDto(
     IReadOnlyList<string> MatchedSkills,
     IReadOnlyList<string> MissingSkills);
 
+public record VolunteerAgentMatchInput(
+    Guid RequestId,
+    string? District,
+    List<VolunteerSkillType>? RequiredSkills,
+    DateTime StartTime,
+    DateTime EndTime,
+    int VolunteersNeeded = 1,
+    string? Notes = null);
+
 public record CreateAssignmentInput(
     Guid VolunteerId,
     Guid? ReliefRequestId,
