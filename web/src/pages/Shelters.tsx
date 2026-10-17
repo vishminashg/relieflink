@@ -46,6 +46,18 @@ export function Shelters() {
       isActive: shelter.isActive, notes: shelter.notes ?? "" });
   };
 
+  const deactivate = async (shelter: Shelter) => {
+    if (!window.confirm(`Deactivate ${shelter.name}?`)) return;
+    setMessage(null);
+    try {
+      await api.deactivateShelter(shelter.id);
+      setMessage("Shelter deactivated.");
+      reload();
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not deactivate shelter.");
+    }
+  };
+
   return <>
     <header className="page-head">
       <h1>Shelters</h1>
@@ -64,7 +76,7 @@ export function Shelters() {
         <div className="panel-head"><h2>{shelter.name}</h2><span className="pill">{shelter.isActive ? "Active" : "Inactive"}</span></div>
         <p>{shelter.address}, {shelter.district}</p>
         <p><strong>{shelter.available}</strong> spaces available of {shelter.capacity}</p>
-        <button className="btn btn-quiet" onClick={() => edit(shelter)}>Edit</button>
+        <div className="button-row"><button className="btn btn-quiet" onClick={() => edit(shelter)}>Edit</button>{shelter.isActive && <button className="btn btn-danger" onClick={() => deactivate(shelter)}>Deactivate</button>}</div>
       </article>)}
     </div>}
     <form className="panel shelter-form" onSubmit={save}>

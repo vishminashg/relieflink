@@ -82,4 +82,5 @@ export const api = {
     call<{ items: Shelter[]; total: number; page: number; pageSize: number }>("GET", `/api/shelters${query(params)}`),
   createShelter: (input: ShelterInput) => call<Shelter>("POST", "/api/shelters", input),
   updateShelter: (id: string, input: ShelterInput) => call<Shelter>("PUT", `/api/shelters/${id}`, input),
+  deactivateShelter: (id: string) => call<void>("DELETE", `/api/shelters/${id}`),
 };
