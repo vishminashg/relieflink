@@ -133,7 +133,8 @@ public class VolunteersController(AppDbContext db, IAuditService audit, TimeProv
         return Ok(new
         {
             items = items.Select(VolunteerDto.From),
-            total,
+            totalCount = total,
+            totalPages = (int)Math.Ceiling(total / (double)pageSize),
             page,
             pageSize
         });

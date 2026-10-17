@@ -160,7 +160,8 @@ public class AssignmentsController(AppDbContext db, IAuditService audit, TimePro
         return Ok(new
         {
             items = items.Select(VolunteerAssignmentDto.From),
-            total,
+            totalCount = total,
+            totalPages = (int)Math.Ceiling(total / (double)pageSize),
             page,
             pageSize
         });
