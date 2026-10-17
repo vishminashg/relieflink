@@ -1,16 +1,27 @@
-# ReliefLink API image. Build context = the api folder.
+# Multi-stage Dockerfile for ReliefLink ASP.NET Core 8 Web API
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ReliefLink.Api/ReliefLink.Api.csproj ReliefLink.Api/
-RUN dotnet restore ReliefLink.Api/ReliefLink.Api.csproj
-COPY ReliefLink.Api/ ReliefLink.Api/
-RUN dotnet publish ReliefLink.Api/ReliefLink.Api.csproj -c Release -o /app --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Copy project file and restore dependencies first to cache layers
+COPY ["ReliefLink.Api/ReliefLink.Api.csproj", "ReliefLink.Api/"]
+RUN dotnet restore "ReliefLink.Api/ReliefLink.Api.csproj"
+
+# Copy source and publish
+COPY . .
+WORKDIR "/src/ReliefLink.Api"
+RUN dotnet publish "ReliefLink.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build /app .
-# Do not run as root.
-USER app
-# Hosting platforms such as Render set PORT; default to 8080.
+
+# Non-root user for container security
+USER $APP_UID
+
+COPY --from=build /app/publish .
+
+# Render dynamically sets PORT; ASP.NET Core 8 respects ASPNETCORE_HTTP_PORTS
+ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
-CMD ["sh", "-c", "ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} exec dotnet ReliefLink.Api.dll"]
+
+ENTRYPOINT ["dotnet", "ReliefLink.Api.dll"]

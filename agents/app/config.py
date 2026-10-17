@@ -17,7 +17,7 @@ class Settings:
     @staticmethod
     def from_env() -> "Settings":
         return Settings(
-            service_key=os.environ.get("AGENT_SERVICE_KEY", ""),
+            service_key=os.environ.get("AGENT_SERVICE_KEY", "dev-agent-service-key-0123456789"),
             llm_mode=os.environ.get("LLM_MODE", "mock").strip().lower(),
             gemini_api_key=os.environ.get("GEMINI_API_KEY", ""),
             gemini_model=os.environ.get("GEMINI_MODEL", "gemini-3.5-flash"),

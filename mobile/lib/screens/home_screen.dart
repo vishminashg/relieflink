@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../state/session.dart';
+import 'inventory_screen.dart';
 import 'requests_screen.dart';
 
 /// Citizens see their requests. Volunteer screens belong to the volunteer component and are added there.
@@ -17,7 +18,21 @@ class HomeScreen extends StatelessWidget {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Welcome, ${user.fullName}. Volunteer tasks will appear here.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Welcome, ${user.fullName}.', textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text('Disaster relief response & emergency logistics.', textAlign: TextAlign.center, style: TextStyle(fontSize: 15, color: Colors.grey)),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InventoryScreen())),
+                  icon: const Icon(Icons.warehouse),
+                  label: const Text('View Depots & Supplies'),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+                ),
+              ],
+            ),
           ),
         ),
       );

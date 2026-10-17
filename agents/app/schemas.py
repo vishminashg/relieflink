@@ -105,3 +105,68 @@ class VolunteerAgentResponse(Wire):
     proposal: VolunteerProposal
     tool_calls: list[ToolCallRecord]
 
+
+# Component B: Supply and Inventory Management Agent
+class SupplyItemStock(Wire):
+    id: str
+    code: str
+    name: str
+    category: Category
+    unit_of_measure: str = "Unit"
+    quantity_available: int = Field(default=0, ge=0)
+    weight_kg: float = Field(default=1.0, ge=0.0)
+
+
+class DepotOption(Wire):
+    id: str
+    code: str
+    name: str
+    district: str
+    items: list[SupplyItemStock] = Field(default_factory=list)
+
+
+class SupplyNeed(Wire):
+    category: Category
+    quantity: int = Field(ge=1, le=1000)
+    description: str | None = None
+
+
+class SupplyMatchingInput(Wire):
+    request_id: str
+    district: str
+    needs: list[SupplyNeed] = Field(min_length=1)
+    available_depots: list[DepotOption] = Field(default_factory=list)
+    notes: str | None = None
+    attempt: int = Field(default=1, ge=1, le=10)
+
+
+class SupplyAllocationLine(Wire):
+    category: Category
+    item_id: str
+    item_code: str
+    item_name: str = ""
+    depot_id: str
+    depot_name: str
+    quantity_allocated: int = Field(ge=1)
+
+
+class SupplyShortage(Wire):
+    category: Category
+    quantity_needed: int
+    quantity_allocated: int
+    shortage: int
+
+
+class SupplyProposal(Wire):
+    lines: list[SupplyAllocationLine] = Field(default_factory=list)
+    shortages: list[SupplyShortage] = Field(default_factory=list)
+    summary: str
+    rationale: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+
+
+class SupplyAgentResponse(Wire):
+    proposal: SupplyProposal
+    tool_calls: list[ToolCallRecord]
+
+

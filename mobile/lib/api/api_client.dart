@@ -115,4 +115,13 @@ class ApiClient {
   Future<ReliefRequest> cancelRequest(String id, String? reason) async => ReliefRequest.fromJson(await _send(
       'POST', '/api/relief-requests/$id/cancel',
       body: {'reason': (reason == null || reason.trim().isEmpty) ? null : reason.trim()}) as Map<String, dynamic>);
+
+  Future<List<StockItemInfo>> getStockLevels({String? category, bool? isLowStock}) async {
+    final q = <String, String>{};
+    if (category != null && category.isNotEmpty) q['category'] = category;
+    if (isLowStock == true) q['isLowStock'] = 'true';
+    final res = await _send('GET', '/api/stock', query: q.isEmpty ? null : q) as List<dynamic>;
+    return res.map((e) => StockItemInfo.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }
+
