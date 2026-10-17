@@ -7,6 +7,7 @@ Gemini (needs GEMINI_API_KEY; the free tier allows about 20 requests a day per m
 
     python evaluate_planner.py                      # mock model, all cases
     python evaluate_planner.py --mode gemini --limit 8
+    python evaluate_planner.py --mode gemini --only 13,14,15,16   # just the prompt-injection cases
     python evaluate_planner.py --json results.json  # also write raw results
 
 The ASP.NET Core PlanValidator remains the authority. This port exists so the agent can be measured on its own.
@@ -142,6 +143,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["mock", "gemini"], default="mock")
     ap.add_argument("--limit", type=int, default=len(CASES))
+    ap.add_argument("--only", help="comma-separated case numbers to run, e.g. 13,14,15,16")
     ap.add_argument("--json")
     args = ap.parse_args()
 
@@ -153,8 +155,13 @@ def main() -> int:
         return 2
     llm = build_llm(settings)
 
+    chosen = CASES[: args.limit]
+    if args.only:
+        wanted = {int(x) for x in args.only.split(",")}
+        chosen = [c for c in CASES if c["id"] in wanted]
+
     results = []
-    for c in CASES[: args.limit]:
+    for c in chosen:
         r = run_case(c, llm)
         results.append(r)
         status = "PASS" if r.get("passed") else ("ERROR " + r["error"] if "error" in r else "FAIL")
