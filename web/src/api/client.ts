@@ -1,5 +1,5 @@
 import type {
-  AuthResponse, Paged, ReliefRequest, RequestFilters, Summary, WorkflowDetail, WorkflowStatus, WorkflowSummary,
+  AuthResponse, Paged, ReliefRequest, RequestFilters, Shelter, ShelterInput, Summary, WorkflowDetail, WorkflowStatus, WorkflowSummary,
 } from "./types";
 
 export const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:5039").replace(/\/$/, "");
@@ -78,4 +78,8 @@ export const api = {
     call<WorkflowDetail>("POST", `/api/workflows/${id}/reject`, { comment, rejectRequest }),
   revise: (id: string, comment: string) => call<WorkflowDetail>("POST", `/api/workflows/${id}/revise`, { comment }),
   execute: (id: string) => call<WorkflowDetail>("POST", `/api/workflows/${id}/execute`),
+  shelters: (params: { district?: string; search?: string; page?: number; pageSize?: number } = {}) =>
+    call<{ items: Shelter[]; total: number; page: number; pageSize: number }>("GET", `/api/shelters${query(params)}`),
+  createShelter: (input: ShelterInput) => call<Shelter>("POST", "/api/shelters", input),
+  updateShelter: (id: string, input: ShelterInput) => call<Shelter>("PUT", `/api/shelters/${id}`, input),
 };

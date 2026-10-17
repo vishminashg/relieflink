@@ -14,6 +14,7 @@ export function Layout() {
           <NavLink to="/" end>Overview</NavLink>
           <NavLink to="/requests">Requests</NavLink>
           <NavLink to="/workflows">AI plans</NavLink>
+          <NavLink to="/shelters">Shelters</NavLink>
         </nav>
         <div className="rail-user">
           <p className="rail-name">{user?.fullName}</p>

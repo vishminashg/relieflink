@@ -7,6 +7,7 @@ import { RequestDetail } from "./pages/RequestDetail";
 import { Requests } from "./pages/Requests";
 import { WorkflowDetail } from "./pages/WorkflowDetail";
 import { Workflows } from "./pages/Workflows";
+import { Shelters } from "./pages/Shelters";
 
 function RequireStaff() {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export function App() {
           <Route path="requests/:id" element={<RequestDetail />} />
           <Route path="workflows" element={<Workflows />} />
           <Route path="workflows/:id" element={<WorkflowDetail />} />
+          <Route path="shelters" element={<Shelters />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

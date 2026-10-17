@@ -60,3 +60,14 @@ export interface RequestFilters {
   status?: RequestStatus | ""; urgency?: Urgency | ""; district?: string; search?: string;
   sort?: "urgency" | "newest" | "oldest"; page?: number; pageSize?: number;
 }
+
+export interface Shelter {
+  id: string; name: string; district: string; address: string;
+  latitude: number; longitude: number; capacity: number; occupied: number; available: number;
+  isActive: boolean; notes: string | null; createdAt: string; updatedAt: string;
+}
+
+export interface ShelterInput {
+  name: string; district: string; address: string; latitude: number; longitude: number;
+  capacity: number; isActive: boolean; notes?: string;
+}
