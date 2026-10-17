@@ -77,8 +77,9 @@ def test_volunteer_agent_runs_graph_and_returns_proposal_with_tool_calls():
     assert len(response.proposal.volunteer_ids) == 1
     assert response.proposal.volunteer_ids[0] in ["vol-1", "vol-2"]
     assert "BoatOperation" in response.proposal.skills_covered
-    assert len(response.tool_calls) == 2  # find_volunteers and volunteer_roster_summary
+    assert len(response.tool_calls) == 4  # find_volunteers, availability checks, and roster summary
     assert any(tc.name == "find_volunteers" for tc in response.tool_calls)
+    assert sum(tc.name == "check_volunteer_availability" for tc in response.tool_calls) == 2
     assert any(tc.name == "volunteer_roster_summary" for tc in response.tool_calls)
 
 

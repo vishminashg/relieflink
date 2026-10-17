@@ -70,6 +70,23 @@ def gather(state: VolunteerAgentState) -> VolunteerAgentState:
         target_district=inp.district,
     )
 
+    availability_checks = {}
+    for candidate in candidates:
+        availability_checks[candidate["id"]] = tb.call(
+            "check_volunteer_availability",
+            volunteer_id=candidate["id"],
+            start_time=inp.start_time,
+            end_time=inp.end_time,
+            availability_windows=candidate.get("availability_windows", []),
+            assignments=candidate.get("assignments", []),
+        )
+
+    ranked["availabilityChecks"] = availability_checks
+    ranked["candidates"] = [
+        candidate for candidate in ranked["candidates"]
+        if availability_checks[candidate["id"]]["available"]
+    ]
+
     return {"facts": {"ranked": ranked}, "drafts": 0, "problems": []}
 
 

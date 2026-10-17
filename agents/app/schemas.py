@@ -80,6 +80,8 @@ class VolunteerCandidate(Wire):
     skills: list[str] = Field(default_factory=list)
     is_verified: bool = False
     completed_assignments: int = 0
+    availability_windows: list[dict[str, Any]] = Field(default_factory=list)
+    assignments: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class VolunteerMatchingInput(Wire):
