@@ -105,3 +105,39 @@ class VolunteerAgentResponse(Wire):
     proposal: VolunteerProposal
     tool_calls: list[ToolCallRecord]
 
+
+# Component E: Safety and Validation Agent
+class ShelterCandidate(Wire):
+    id: str
+    name: str = ""
+    district: str
+    capacity: int = Field(ge=1)
+    occupied: int = Field(ge=0)
+    is_active: bool = True
+
+
+class SafetyValidationInput(Wire):
+    request_id: str
+    district: str
+    household_size: int = Field(ge=1, le=1000)
+    notes: str | None = Field(default=None, max_length=2000)
+    shelters: list[ShelterCandidate] = Field(default_factory=list)
+
+
+class ValidationCheck(Wire):
+    name: str
+    ok: bool
+    detail: str
+
+
+class ValidatedProposal(Wire):
+    ok: bool
+    shelter_id: str | None = None
+    checks: list[ValidationCheck]
+    summary: str
+
+
+class SafetyValidationResponse(Wire):
+    proposal: ValidatedProposal
+    tool_calls: list[ToolCallRecord]
+

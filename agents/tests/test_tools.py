@@ -16,6 +16,7 @@ def test_allow_list_is_exactly_these_read_only_tools():
         "deadline_pressure",
         "find_volunteers",
         "volunteer_roster_summary",
+        "get_shelter_capacity",
     }
 
 

@@ -37,3 +37,5 @@ mobile/.packages
 .idea/
 .vscode/
 .DS_Store
+
+*.pdf

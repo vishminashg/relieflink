@@ -16,9 +16,12 @@ from .schemas import (
     PlannerResponse,
     VolunteerAgentResponse,
     VolunteerMatchingInput,
+    SafetyValidationInput,
+    SafetyValidationResponse,
 )
 from .security import require_service_key
 from .volunteer_agent import run_volunteer_agent
+from .safety_agent import run_safety_agent
 
 
 log = logging.getLogger("agents")
@@ -78,6 +81,13 @@ def create_app(settings: Settings | None = None, llm: LLMClient | None = None) -
 
         log.info("matched volunteers for request %s (attempt %s) in %d ms", inp.request_id, inp.attempt,
                  int((time.perf_counter() - started) * 1000))
+        return result
+
+    @app.post("/agents/safety", response_model=SafetyValidationResponse, response_model_by_alias=True,
+              dependencies=[Depends(require_service_key)])
+    def validate_safety(inp: SafetyValidationInput) -> SafetyValidationResponse:
+        result = run_safety_agent(inp)
+        log.info("validated safety for request %s", inp.request_id)
         return result
 
     return app

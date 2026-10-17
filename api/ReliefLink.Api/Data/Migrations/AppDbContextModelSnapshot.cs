@@ -304,6 +304,111 @@ namespace ReliefLink.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.Shelter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("District");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("Shelters", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Shelters_Capacity", "\"Capacity\" BETWEEN 1 AND 100000");
+
+                            t.HasCheckConstraint("CK_Shelters_Latitude", "\"Latitude\" BETWEEN 5.5 AND 10.0");
+
+                            t.HasCheckConstraint("CK_Shelters_Longitude", "\"Longitude\" BETWEEN 79.4 AND 82.0");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.ShelterCheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CheckedInByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CheckedOutAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("HouseholdSize")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ReliefRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ShelterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CheckedInByUserId");
+
+                    b.HasIndex("ReliefRequestId")
+                        .IsUnique()
+                        .HasFilter("\"ReliefRequestId\" IS NOT NULL");
+
+                    b.HasIndex("ShelterId", "CheckedOutAt");
+
+                    b.ToTable("ShelterCheckIns", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ShelterCheckIns_HouseholdSize", "\"HouseholdSize\" BETWEEN 1 AND 1000");
+                        });
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ToolCall", b =>
                 {
                     b.Property<Guid>("Id")
@@ -760,6 +865,32 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("ReliefRequest");
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.ShelterCheckIn", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.User", "CheckedInByUser")
+                        .WithMany()
+                        .HasForeignKey("CheckedInByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.ReliefRequest", "ReliefRequest")
+                        .WithMany()
+                        .HasForeignKey("ReliefRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ReliefLink.Api.Domain.Shelter", "Shelter")
+                        .WithMany("CheckIns")
+                        .HasForeignKey("ShelterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CheckedInByUser");
+
+                    b.Navigation("ReliefRequest");
+
+                    b.Navigation("Shelter");
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ToolCall", b =>
                 {
                     b.HasOne("ReliefLink.Api.Domain.WorkflowStep", "Step")
@@ -864,6 +995,11 @@ namespace ReliefLink.Api.Data.Migrations
             modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.Shelter", b =>
+                {
+                    b.Navigation("CheckIns");
                 });
 
             modelBuilder.Entity("ReliefLink.Api.Domain.Volunteer", b =>

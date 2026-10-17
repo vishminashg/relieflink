@@ -86,6 +86,23 @@ def volunteer_roster_summary(selected_ids: list[str], candidates: list[dict[str,
     return {"selectedCount": len(selected_ids), "skillsCovered": sorted(list(skills_covered)), "districts": sorted(list(districts))}
 
 
+def get_shelter_capacity(shelters: list[dict[str, Any]], household_size: int, district: str) -> dict[str, Any]:
+    """Returns active shelters that can fit the household, without changing shelter state."""
+    candidates = []
+    for shelter in shelters:
+        available = max(0, shelter.get("capacity", 0) - shelter.get("occupied", 0))
+        if shelter.get("is_active", True) and available >= household_size:
+            candidates.append({
+                "id": shelter["id"],
+                "name": shelter.get("name", ""),
+                "district": shelter.get("district", ""),
+                "available": available,
+                "sameDistrict": shelter.get("district", "").lower() == district.lower(),
+            })
+    candidates.sort(key=lambda x: (x["sameDistrict"], x["available"]), reverse=True)
+    return {"candidates": candidates, "requested": household_size}
+
+
 ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "triage_breakdown": triage_breakdown,
     "need_priority_order": need_priority_order,
@@ -93,6 +110,7 @@ ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "deadline_pressure": deadline_pressure,
     "find_volunteers": find_volunteers,
     "volunteer_roster_summary": volunteer_roster_summary,
+    "get_shelter_capacity": get_shelter_capacity,
 }
 
 
