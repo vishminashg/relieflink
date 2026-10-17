@@ -36,6 +36,16 @@ void main() {
       expect(server.calls.single.query['sort'], 'newest');
     });
 
+    test('loads nearby shelters with the request coordinates', () async {
+      final server = FakeServer({'GET /api/shelters/nearest': (_) => [
+        {'id': 's1', 'name': 'Kalutara Hall', 'district': 'Kalutara', 'address': 'Main Road', 'latitude': 6.58, 'longitude': 79.96, 'capacity': 100, 'occupied': 40, 'available': 60, 'isActive': true},
+      ]});
+      final shelters = await clientFor(server).nearestShelters(latitude: 6.58, longitude: 79.96);
+      expect(shelters.single.available, 60);
+      expect(server.calls.single.query['latitude'], '6.58');
+      expect(server.calls.single.query['longitude'], '79.96');
+    });
+
     test('register always asks for the Citizen role', () async {
       final server = FakeServer({'POST /api/auth/register': (_) => authJson()});
       await clientFor(server).register(fullName: 'A B', email: 'a@b.lk', password: 'abcdefg1', phone: '', district: 'Galle');

@@ -175,6 +175,21 @@ void main() {
       expect(find.text('Progress'), findsNothing);
     });
 
+    testWidgets('an approved request can find nearby shelters', (tester) async {
+      final app = await TestApp.create({
+        'GET /api/relief-requests': (_) => pagedJson([requestJson(status: 'Approved')]),
+        'GET /api/shelters/nearest': (_) => [
+          {'id': 's1', 'name': 'Kalutara Hall', 'district': 'Gampaha', 'address': 'Main Road', 'latitude': 6.58, 'longitude': 79.96, 'capacity': 100, 'occupied': 40, 'available': 60, 'isActive': true},
+        ],
+      });
+      await pump(tester, app);
+      await tapText(tester, 'Gampaha');
+      await tapText(tester, 'Find nearby shelters');
+      expect(find.text('Nearby shelters'), findsOneWidget);
+      expect(find.text('Kalutara Hall'), findsOneWidget);
+      expect(find.text('60 spaces available'), findsOneWidget);
+    });
+
     testWidgets('cancelling asks first, then sends the reason', (tester) async {
       final app = await TestApp.create({
         'GET /api/relief-requests': (_) => pagedJson([requestJson()]),

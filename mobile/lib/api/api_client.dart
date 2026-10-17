@@ -115,4 +115,11 @@ class ApiClient {
   Future<ReliefRequest> cancelRequest(String id, String? reason) async => ReliefRequest.fromJson(await _send(
       'POST', '/api/relief-requests/$id/cancel',
       body: {'reason': (reason == null || reason.trim().isEmpty) ? null : reason.trim()}) as Map<String, dynamic>);
+
+  Future<List<Shelter>> nearestShelters({required double latitude, required double longitude, int limit = 5}) async {
+    final json = await _send('GET', '/api/shelters/nearest', query: {
+      'latitude': '$latitude', 'longitude': '$longitude', 'limit': '$limit',
+    });
+    return (json as List<dynamic>).map((e) => Shelter.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }

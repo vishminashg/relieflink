@@ -6,6 +6,7 @@ import '../api/models.dart';
 import '../logic/status_text.dart';
 import '../widgets/common.dart';
 import 'request_form_screen.dart';
+import 'nearby_shelters_screen.dart';
 
 class RequestDetailScreen extends StatefulWidget {
   const RequestDetailScreen({super.key, required this.request});
@@ -83,6 +84,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             Text('${r.addressText}, ${r.district}'),
             Text('Sent ${timeAgo(r.createdAt, now)}', style: const TextStyle(color: Colors.black54)),
           ]),
+          if (r.status == 'Approved' || r.status == 'InProgress') ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.home_work_outlined),
+              onPressed: () => Navigator.of(context).push<void>(MaterialPageRoute(
+                builder: (_) => NearbySheltersScreen(latitude: r.latitude, longitude: r.longitude, district: r.district),
+              )),
+              label: const Text('Find nearby shelters'),
+            ),
+          ],
           if (r.canEdit) OutlinedButton(onPressed: _busy ? null : _edit, child: const Text('Change my request')),
           if (r.canEdit && r.canCancel) const SizedBox(height: 10),
           if (r.canCancel)
