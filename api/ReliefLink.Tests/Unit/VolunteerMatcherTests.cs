@@ -302,6 +302,65 @@ public class VolunteerMatcherTests
     }
 
     [Fact]
+    public void ValidateProposal_WhenVolunteerIsDuplicated_FailsUniqueVolunteersCheck()
+    {
+        var id = Guid.NewGuid();
+        var volunteer = new Volunteer
+        {
+            Id = id,
+            IsActive = true,
+            District = "Kalutara",
+            Skills = [new VolunteerSkill { Skill = VolunteerSkillType.BoatOperation }]
+        };
+
+        var checks = VolunteerMatcher.ValidateProposal(
+            proposedVolunteerIds: [id, id],
+            volunteersById: new Dictionary<Guid, Volunteer> { [id] = volunteer },
+            requiredSkills: [VolunteerSkillType.BoatOperation],
+            requestedCount: 2,
+            missionStartUtc: BaseTime,
+            missionEndUtc: BaseTime.AddHours(3),
+            summary: "The proposed roster contains one volunteer twice.");
+
+        var check = checks.First(c => c.Name == "unique-volunteers");
+        Assert.False(check.Passed);
+    }
+
+    [Fact]
+    public void ValidateProposal_WhenVolunteerAvailabilityDoesNotCoverMission_FailsAvailabilityCheck()
+    {
+        var id = Guid.NewGuid();
+        var volunteer = new Volunteer
+        {
+            Id = id,
+            IsActive = true,
+            District = "Kalutara",
+            Skills = [new VolunteerSkill { Skill = VolunteerSkillType.BoatOperation }],
+            Availabilities =
+            [
+                new VolunteerAvailability
+                {
+                    Type = AvailabilityType.SpecificDate,
+                    SpecificStartUtc = BaseTime,
+                    SpecificEndUtc = BaseTime.AddHours(1)
+                }
+            ]
+        };
+
+        var checks = VolunteerMatcher.ValidateProposal(
+            proposedVolunteerIds: [id],
+            volunteersById: new Dictionary<Guid, Volunteer> { [id] = volunteer },
+            requiredSkills: [VolunteerSkillType.BoatOperation],
+            requestedCount: 1,
+            missionStartUtc: BaseTime,
+            missionEndUtc: BaseTime.AddHours(3),
+            summary: "The proposed volunteer is available for the mission.");
+
+        var check = checks.First(c => c.Name == "availability-covered");
+        Assert.False(check.Passed);
+    }
+
+    [Fact]
     public void ValidateProposal_WhenSummaryContainsLinkOrMarkup_FailsRationaleCheck()
     {
         var id1 = Guid.NewGuid();

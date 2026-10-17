@@ -294,6 +294,12 @@ public static class VolunteerMatcher
             countMatches,
             countMatches ? null : $"Proposed {proposedVolunteerIds.Count} volunteers, but mission requested {requestedCount}."));
 
+        var hasDuplicateVolunteers = proposedVolunteerIds.Count == proposedVolunteerIds.Distinct().Count();
+        checks.Add(new ProposalValidationCheck(
+            "unique-volunteers",
+            hasDuplicateVolunteers,
+            hasDuplicateVolunteers ? null : "The proposal contains the same volunteer more than once."));
+
         // 3. No double booking
         var conflictFree = true;
         List<string> conflictDetails = [];
@@ -318,6 +324,24 @@ public static class VolunteerMatcher
             "no-double-booking",
             conflictFree,
             conflictFree ? null : string.Join(" | ", conflictDetails)));
+
+        var availabilityValid = true;
+        List<string> availabilityDetails = [];
+
+        foreach (var id in proposedVolunteerIds.Distinct())
+        {
+            if (volunteersById.TryGetValue(id, out var v) &&
+                !IsWindowCoveredByAvailability(v.Availabilities, missionStartUtc, missionEndUtc))
+            {
+                availabilityValid = false;
+                availabilityDetails.Add($"Volunteer {id} is not available for the requested time window.");
+            }
+        }
+
+        checks.Add(new ProposalValidationCheck(
+            "availability-covered",
+            availabilityValid,
+            availabilityValid ? null : string.Join(" | ", availabilityDetails)));
 
         // 4. Skills satisfied across the team
         var allSkillsSatisfied = true;
