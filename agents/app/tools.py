@@ -86,6 +86,98 @@ def volunteer_roster_summary(selected_ids: list[str], candidates: list[dict[str,
     return {"selectedCount": len(selected_ids), "skillsCovered": sorted(list(skills_covered)), "districts": sorted(list(districts))}
 
 
+def list_depots(depots: list[dict[str, Any]], target_district: str) -> dict[str, Any]:
+    """Ranks available depots based on district proximity to the relief destination."""
+    ranked = []
+    for d in depots:
+        dist = d.get("district", "").strip()
+        same = dist.lower() == target_district.lower()
+        items_count = len(d.get("items", []))
+        total_avail = sum(i.get("quantity_available", 0) for i in d.get("items", []))
+        ranked.append({
+            "id": d["id"],
+            "code": d.get("code", ""),
+            "name": d.get("name", ""),
+            "district": dist,
+            "sameDistrict": same,
+            "itemsCount": items_count,
+            "totalAvailableUnits": total_avail,
+            "items": d.get("items", [])
+        })
+    ranked.sort(key=lambda x: (x["sameDistrict"], x["totalAvailableUnits"]), reverse=True)
+    return {"depots": ranked, "total": len(ranked)}
+
+
+def check_stock(depots: list[dict[str, Any]], needed_category: str, needed_qty: int, target_district: str) -> dict[str, Any]:
+    """Finds matching available stock for a specific category across candidate depots."""
+    candidates = []
+    total_found = 0
+
+    for d in depots:
+        dist = d.get("district", "").strip()
+        same = dist.lower() == target_district.lower()
+        for it in d.get("items", []):
+            if it.get("category", "").lower() == needed_category.lower():
+                avail = it.get("quantity_available", 0)
+                if avail > 0:
+                    total_found += avail
+                    candidates.append({
+                        "depotId": d["id"],
+                        "depotName": d.get("name", ""),
+                        "depotDistrict": dist,
+                        "sameDistrict": same,
+                        "itemId": it["id"],
+                        "itemCode": it.get("code", ""),
+                        "itemName": it.get("name", ""),
+                        "category": it.get("category", ""),
+                        "available": avail
+                    })
+
+    candidates.sort(key=lambda c: (c["sameDistrict"], c["available"]), reverse=True)
+    shortage = max(0, needed_qty - total_found)
+    return {
+        "category": needed_category,
+        "neededQuantity": needed_qty,
+        "totalAvailable": total_found,
+        "shortage": shortage,
+        "isFullyCovered": shortage == 0,
+        "candidateOptions": candidates
+    }
+
+
+def supply_allocation_summary(lines: list[dict[str, Any]], needs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Calculates coverage, total units allocated, and remaining shortages across needs."""
+    allocated_by_cat: dict[str, int] = {}
+    depots_used = set()
+    total_units = 0
+
+    for line in lines:
+        cat = line.get("category", "")
+        qty = line.get("quantity_allocated", 0)
+        allocated_by_cat[cat] = allocated_by_cat.get(cat, 0) + qty
+        total_units += qty
+        if "depot_id" in line:
+            depots_used.add(line["depot_id"])
+        elif "depotId" in line:
+            depots_used.add(line["depotId"])
+
+    shortages = []
+    for n in needs:
+        cat = n.get("category", "")
+        needed = n.get("quantity", 0)
+        alloc = allocated_by_cat.get(cat, 0)
+        if alloc < needed:
+            shortages.append({"category": cat, "needed": needed, "allocated": alloc, "shortage": needed - alloc})
+
+    return {
+        "totalUnitsAllocated": total_units,
+        "uniqueDepotsCount": len(depots_used),
+        "shortagesCount": len(shortages),
+        "shortages": shortages,
+        "isAllCovered": len(shortages) == 0
+    }
+
+
 ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "triage_breakdown": triage_breakdown,
     "need_priority_order": need_priority_order,
@@ -93,6 +185,9 @@ ALLOWED_TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "deadline_pressure": deadline_pressure,
     "find_volunteers": find_volunteers,
     "volunteer_roster_summary": volunteer_roster_summary,
+    "list_depots": list_depots,
+    "check_stock": check_stock,
+    "supply_allocation_summary": supply_allocation_summary,
 }
 
 

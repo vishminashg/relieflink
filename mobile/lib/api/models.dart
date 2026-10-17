@@ -134,3 +134,41 @@ class PagedRequests {
         totalCount: (json['totalCount'] as num).toInt(),
       );
 }
+
+// Component B: Supply and Inventory Management
+class StockItemInfo {
+  const StockItemInfo({
+    required this.id,
+    required this.depotName,
+    required this.depotDistrict,
+    required this.itemCode,
+    required this.itemName,
+    required this.category,
+    required this.unitOfMeasure,
+    required this.quantityAvailable,
+    required this.isLowStock,
+  });
+
+  final String id;
+  final String depotName;
+  final String depotDistrict;
+  final String itemCode;
+  final String itemName;
+  final String category;
+  final String unitOfMeasure;
+  final int quantityAvailable;
+  final bool isLowStock;
+
+  factory StockItemInfo.fromJson(Map<String, dynamic> json) => StockItemInfo(
+        id: json['id'] as String,
+        depotName: json['depotName'] as String,
+        depotDistrict: json['depotDistrict'] as String,
+        itemCode: json['itemCode'] as String,
+        itemName: json['itemName'] as String,
+        category: json['category'] as String,
+        unitOfMeasure: json['unitOfMeasure'] as String,
+        quantityAvailable: (json['quantityAvailable'] as num).toInt(),
+        isLowStock: json['isLowStock'] as bool? ?? false,
+      );
+}
+

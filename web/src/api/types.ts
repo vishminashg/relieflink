@@ -60,3 +60,99 @@ export interface RequestFilters {
   status?: RequestStatus | ""; urgency?: Urgency | ""; district?: string; search?: string;
   sort?: "urgency" | "newest" | "oldest"; page?: number; pageSize?: number;
 }
+
+// Component B: Supply and Inventory Management
+export interface Depot {
+  id: string;
+  code: string;
+  name: string;
+  district: string;
+  addressText: string;
+  latitude: number;
+  longitude: number;
+  contactPerson: string;
+  contactPhone: string;
+  capacitySquareMeters: number;
+  isActive: boolean;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupplyItem {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  category: string;
+  unitOfMeasure: string;
+  weightKg: number;
+  reorderThreshold: number;
+  standardFamilyAllocation: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockLevel {
+  id: string;
+  depotId: string;
+  depotCode: string;
+  depotName: string;
+  depotDistrict: string;
+  supplyItemId: string;
+  itemCode: string;
+  itemName: string;
+  category: string;
+  unitOfMeasure: string;
+  quantityOnHand: number;
+  quantityReserved: number;
+  quantityAvailable: number;
+  isLowStock: boolean;
+  lastRestockedAt: string | null;
+  storageBin: string | null;
+}
+
+export interface StockReservation {
+  id: string;
+  reservationNumber: string;
+  depotId: string;
+  depotName: string;
+  supplyItemId: string;
+  itemName: string;
+  quantity: number;
+  reliefRequestId: string | null;
+  status: string;
+  reservedByUserId: string;
+  expiresAt: string;
+  fulfilledAt: string | null;
+  cancelledAt: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface LowStockAlert {
+  depotId: string;
+  depotName: string;
+  district: string;
+  supplyItemId: string;
+  itemCode: string;
+  itemName: string;
+  category: string;
+  quantityOnHand: number;
+  quantityReserved: number;
+  quantityAvailable: number;
+  reorderThreshold: number;
+  shortage: number;
+}
+
+export interface InventorySummary {
+  totalDepots: number;
+  totalSupplyItems: number;
+  totalStockOnHand: number;
+  totalStockReserved: number;
+  totalStockAvailable: number;
+  lowStockAlertsCount: number;
+  activeReservationsCount: number;
+}
+

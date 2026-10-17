@@ -15,7 +15,14 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from .schemas import Plan, PlanNeedLine, VolunteerProposal
+from .schemas import (
+    Plan,
+    PlanNeedLine,
+    SupplyAllocationLine,
+    SupplyProposal,
+    SupplyShortage,
+    VolunteerProposal,
+)
 from .tools import NEED_PRIORITY
 
 # Slowest acceptable response time per urgency level. The backend enforces the same limits.
@@ -29,6 +36,8 @@ class LLMError(Exception):
 class LLMClient(Protocol):
     def draft_plan(self, context: dict[str, Any]) -> Plan: ...
     def draft_volunteers(self, context: dict[str, Any]) -> VolunteerProposal: ...
+    def draft_supply(self, context: dict[str, Any]) -> SupplyProposal: ...
+
 
 
 
@@ -114,6 +123,76 @@ class MockLLM:
             summary=summary,
             rationale=rationale
         )
+
+    def draft_supply(self, context: dict[str, Any]) -> SupplyProposal:
+        inp = context["input"]
+        facts = context["facts"]
+        target_district = inp.get("district", "")
+        needs = inp.get("needs", [])
+
+        lines: list[SupplyAllocationLine] = []
+        shortages: list[SupplyShortage] = []
+        allocated_by_cat: dict[str, int] = {}
+
+        for need in needs:
+            cat = need["category"]
+            qty_needed = need["quantity"]
+            check = facts.get("stock_by_category", {}).get(cat, {})
+            options = check.get("candidateOptions", [])
+
+            remaining = qty_needed
+            for opt in options:
+                if remaining <= 0:
+                    break
+                take = min(remaining, opt["available"])
+                if take > 0:
+                    lines.append(SupplyAllocationLine(
+                        category=cat,
+                        item_id=opt["itemId"],
+                        item_code=opt["itemCode"],
+                        item_name=opt.get("itemName", ""),
+                        depot_id=opt["depotId"],
+                        depot_name=opt["depotName"],
+                        quantity_allocated=take,
+                    ))
+                    remaining -= take
+                    allocated_by_cat[cat] = allocated_by_cat.get(cat, 0) + take
+
+            if remaining > 0:
+                shortages.append(SupplyShortage(
+                    category=cat,
+                    quantity_needed=qty_needed,
+                    quantity_allocated=qty_needed - remaining,
+                    shortage=remaining
+                ))
+
+        depot_names = sorted(list(set(l.depot_name for l in lines)))
+        summary = (
+            f"Allocated {len(lines)} item line(s) totaling {sum(l.quantity_allocated for l in lines)} unit(s) "
+            f"across {len(depot_names)} depot(s) for {target_district}."
+        )
+        if shortages:
+            summary += f" Shortages detected in {len(shortages)} category(ies)."
+
+        rationale = [
+            f"Prioritized depots within or closest to {target_district}.",
+            f"Fulfilled needs using available depot stock: {', '.join(depot_names)}." if depot_names else "No stock available in candidate depots.",
+            "Enforced strict non-negative inventory thresholds and validated batch quantities."
+        ]
+        risks = []
+        if any(s.shortage > 0 for s in shortages):
+            risks.append("Supply shortages exist; urgent replenishment from central hub required.")
+        if len(depot_names) > 1:
+            risks.append("Multi-depot dispatch: coordination needed between multiple transport runs.")
+
+        return SupplyProposal(
+            lines=lines,
+            shortages=shortages,
+            summary=summary,
+            rationale=rationale,
+            risks=risks
+        )
+
 
 
 # ---------------------------------------------------------------------------------------------
@@ -218,6 +297,10 @@ class GeminiLLM:
 
     def draft_volunteers(self, context: dict[str, Any]) -> VolunteerProposal:
         return MockLLM().draft_volunteers(context)
+
+    def draft_supply(self, context: dict[str, Any]) -> SupplyProposal:
+        return MockLLM().draft_supply(context)
+
 
 
 

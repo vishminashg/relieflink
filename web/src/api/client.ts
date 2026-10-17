@@ -78,4 +78,28 @@ export const api = {
     call<WorkflowDetail>("POST", `/api/workflows/${id}/reject`, { comment, rejectRequest }),
   revise: (id: string, comment: string) => call<WorkflowDetail>("POST", `/api/workflows/${id}/revise`, { comment }),
   execute: (id: string) => call<WorkflowDetail>("POST", `/api/workflows/${id}/execute`),
+
+  // Component B: Supply and Inventory Management
+  depots: (district?: string, search?: string) =>
+    call<import("./types").Depot[]>("GET", `/api/depots${query({ district, search })}`),
+  depot: (id: string) => call<import("./types").Depot>("GET", `/api/depots/${id}`),
+  createDepot: (data: Partial<import("./types").Depot>) => call<import("./types").Depot>("POST", "/api/depots", data),
+  updateDepot: (id: string, data: Partial<import("./types").Depot>) => call<import("./types").Depot>("PUT", `/api/depots/${id}`, data),
+  supplyItems: (category?: string, search?: string) =>
+    call<import("./types").SupplyItem[]>("GET", `/api/supply-items${query({ category, search })}`),
+  createSupplyItem: (data: Partial<import("./types").SupplyItem>) => call<import("./types").SupplyItem>("POST", "/api/supply-items", data),
+  stockLevels: (depotId?: string, isLowStock?: boolean) =>
+    call<import("./types").StockLevel[]>("GET", `/api/stock${query({ depotId, isLowStock: isLowStock ? "true" : undefined })}`),
+  inventorySummary: () => call<import("./types").InventorySummary>("GET", "/api/inventory/summary"),
+  lowStockAlerts: () => call<import("./types").LowStockAlert[]>("GET", "/api/inventory/low-stock"),
+  receiveStock: (data: { depotId: string; supplyItemId: string; quantity: number; referenceNumber?: string; notes?: string }) =>
+    call<import("./types").StockLevel>("POST", "/api/stock/receive", data),
+  reservations: (depotId?: string, status?: string) =>
+    call<import("./types").StockReservation[]>("GET", `/api/reservations${query({ depotId, status })}`),
+  createReservation: (data: { depotId: string; supplyItemId: string; quantity: number; notes?: string }) =>
+    call<import("./types").StockReservation>("POST", "/api/reservations", data),
+  fulfillReservation: (id: string, notes?: string) =>
+    call<import("./types").StockReservation>("POST", `/api/reservations/${id}/fulfill${query({ notes })}`),
+  cancelReservation: (id: string, reason?: string) =>
+    call<import("./types").StockReservation>("POST", `/api/reservations/${id}/cancel${query({ reason })}`),
 };

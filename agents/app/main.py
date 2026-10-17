@@ -14,14 +14,18 @@ from .schemas import (
     PlanNeedLine,
     PlannerInput,
     PlannerResponse,
+    SupplyAgentResponse,
+    SupplyMatchingInput,
     VolunteerAgentResponse,
     VolunteerMatchingInput,
 )
 from .security import require_service_key
+from .supply_agent import run_supply_agent
 from .volunteer_agent import run_volunteer_agent
 
 
 log = logging.getLogger("agents")
+
 
 
 def apply_mock_fault(plan: Plan, fault: str, attempt: int) -> Plan:
@@ -77,6 +81,20 @@ def create_app(settings: Settings | None = None, llm: LLMClient | None = None) -
             raise HTTPException(status_code=502, detail="The language model could not propose volunteers.") from exc
 
         log.info("matched volunteers for request %s (attempt %s) in %d ms", inp.request_id, inp.attempt,
+                 int((time.perf_counter() - started) * 1000))
+        return result
+
+    @app.post("/agents/supply", response_model=SupplyAgentResponse, response_model_by_alias=True,
+              dependencies=[Depends(require_service_key)])
+    def match_supply(inp: SupplyMatchingInput) -> SupplyAgentResponse:
+        started = time.perf_counter()
+        try:
+            result = run_supply_agent(inp, llm)
+        except LLMError as exc:
+            log.warning("supply agent failed for request %s: %s", inp.request_id, exc)
+            raise HTTPException(status_code=502, detail="The language model could not propose supply allocations.") from exc
+
+        log.info("matched supplies for request %s (attempt %s) in %d ms", inp.request_id, inp.attempt,
                  int((time.perf_counter() - started) * 1000))
         return result
 

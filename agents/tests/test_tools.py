@@ -16,6 +16,9 @@ def test_allow_list_is_exactly_these_read_only_tools():
         "deadline_pressure",
         "find_volunteers",
         "volunteer_roster_summary",
+        "list_depots",
+        "check_stock",
+        "supply_allocation_summary",
     }
 
 

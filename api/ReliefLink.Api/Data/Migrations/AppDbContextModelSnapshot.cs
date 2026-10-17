@@ -159,6 +159,76 @@ namespace ReliefLink.Api.Data.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.Depot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AddressText")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<double>("CapacitySquareMeters")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ContactPerson")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("District");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("Depots", (string)null);
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,6 +371,250 @@ namespace ReliefLink.Api.Data.Migrations
                     b.ToTable("ReliefRequestItems", null, t =>
                         {
                             t.HasCheckConstraint("CK_ReliefRequestItems_Quantity", "\"Quantity\" BETWEEN 1 AND 1000");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockLevel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DepotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("LastRestockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("QuantityOnHand")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantityReserved")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StorageBin")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("SupplyItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuantityOnHand");
+
+                    b.HasIndex("SupplyItemId");
+
+                    b.HasIndex("DepotId", "SupplyItemId")
+                        .IsUnique();
+
+                    b.ToTable("StockLevels", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_StockLevels_OnHand_GTE_Reserved", "\"QuantityOnHand\" >= \"QuantityReserved\"");
+
+                            t.HasCheckConstraint("CK_StockLevels_OnHand_NonNegative", "\"QuantityOnHand\" >= 0");
+
+                            t.HasCheckConstraint("CK_StockLevels_Reserved_NonNegative", "\"QuantityReserved\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DepotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FulfilledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ReliefRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReservationNumber")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<Guid>("ReservedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("SupplyItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepotId");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("ReliefRequestId");
+
+                    b.HasIndex("ReservationNumber")
+                        .IsUnique();
+
+                    b.HasIndex("ReservedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("SupplyItemId");
+
+                    b.ToTable("StockReservations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_StockReservations_Quantity_Positive", "\"Quantity\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DepotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("PerformedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QuantityAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantityBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantityChanged")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<Guid>("SupplyItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("PerformedByUserId");
+
+                    b.HasIndex("SupplyItemId");
+
+                    b.HasIndex("DepotId", "SupplyItemId");
+
+                    b.ToTable("StockTransactions", (string)null);
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.SupplyItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int>("ReorderThreshold")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StandardFamilyAllocation")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UnitOfMeasure")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("WeightKg")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Category");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("SupplyItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SupplyItems_ReorderThreshold", "\"ReorderThreshold\" >= 0");
+
+                            t.HasCheckConstraint("CK_SupplyItems_StandardAllocation", "\"StandardFamilyAllocation\" >= 1");
                         });
                 });
 
@@ -760,6 +1074,86 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("ReliefRequest");
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockLevel", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.Depot", "Depot")
+                        .WithMany("StockLevels")
+                        .HasForeignKey("DepotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.SupplyItem", "SupplyItem")
+                        .WithMany("StockLevels")
+                        .HasForeignKey("SupplyItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Depot");
+
+                    b.Navigation("SupplyItem");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockReservation", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.Depot", "Depot")
+                        .WithMany("Reservations")
+                        .HasForeignKey("DepotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.ReliefRequest", "ReliefRequest")
+                        .WithMany()
+                        .HasForeignKey("ReliefRequestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ReliefLink.Api.Domain.User", "ReservedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReservedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.SupplyItem", "SupplyItem")
+                        .WithMany()
+                        .HasForeignKey("SupplyItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Depot");
+
+                    b.Navigation("ReliefRequest");
+
+                    b.Navigation("ReservedByUser");
+
+                    b.Navigation("SupplyItem");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.StockTransaction", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.Depot", "Depot")
+                        .WithMany("Transactions")
+                        .HasForeignKey("DepotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.User", "PerformedByUser")
+                        .WithMany()
+                        .HasForeignKey("PerformedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.SupplyItem", "SupplyItem")
+                        .WithMany()
+                        .HasForeignKey("SupplyItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Depot");
+
+                    b.Navigation("PerformedByUser");
+
+                    b.Navigation("SupplyItem");
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ToolCall", b =>
                 {
                     b.HasOne("ReliefLink.Api.Domain.WorkflowStep", "Step")
@@ -861,9 +1255,23 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("Validations");
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.Depot", b =>
+                {
+                    b.Navigation("Reservations");
+
+                    b.Navigation("StockLevels");
+
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.SupplyItem", b =>
+                {
+                    b.Navigation("StockLevels");
                 });
 
             modelBuilder.Entity("ReliefLink.Api.Domain.Volunteer", b =>
