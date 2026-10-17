@@ -134,3 +134,162 @@ class PagedRequests {
         totalCount: (json['totalCount'] as num).toInt(),
       );
 }
+
+// ==========================================
+// Component C: Volunteer Management Models
+// ==========================================
+
+class VolunteerSkillModel {
+  const VolunteerSkillModel({
+    required this.id,
+    required this.skill,
+    required this.proficiency,
+    this.certificateReference,
+    required this.isVerified,
+  });
+
+  final String id;
+  final String skill;
+  final String proficiency;
+  final String? certificateReference;
+  final bool isVerified;
+
+  factory VolunteerSkillModel.fromJson(Map<String, dynamic> json) => VolunteerSkillModel(
+        id: json['id'] as String,
+        skill: json['skill'] as String,
+        proficiency: json['proficiency'] as String,
+        certificateReference: json['certificateReference'] as String?,
+        isVerified: json['isVerified'] as bool? ?? false,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'skill': skill,
+        'proficiency': proficiency,
+        if (certificateReference != null) 'certificateReference': certificateReference,
+      };
+}
+
+class VolunteerAvailabilityModel {
+  const VolunteerAvailabilityModel({
+    required this.id,
+    required this.type,
+    this.dayOfWeek,
+    this.startTime,
+    this.endTime,
+    this.specificStartUtc,
+    this.specificEndUtc,
+  });
+
+  final String id;
+  final String type;
+  final String? dayOfWeek;
+  final String? startTime;
+  final String? endTime;
+  final DateTime? specificStartUtc;
+  final DateTime? specificEndUtc;
+
+  factory VolunteerAvailabilityModel.fromJson(Map<String, dynamic> json) => VolunteerAvailabilityModel(
+        id: json['id'] as String,
+        type: json['type'] as String,
+        dayOfWeek: json['dayOfWeek'] as String?,
+        startTime: json['startTime'] as String?,
+        endTime: json['endTime'] as String?,
+        specificStartUtc: json['specificStartUtc'] == null ? null : DateTime.parse(json['specificStartUtc'] as String).toUtc(),
+        specificEndUtc: json['specificEndUtc'] == null ? null : DateTime.parse(json['specificEndUtc'] as String).toUtc(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
+        if (startTime != null) 'startTime': startTime,
+        if (endTime != null) 'endTime': endTime,
+        if (specificStartUtc != null) 'specificStartUtc': specificStartUtc!.toIso8601String(),
+        if (specificEndUtc != null) 'specificEndUtc': specificEndUtc!.toIso8601String(),
+      };
+}
+
+class VolunteerProfile {
+  const VolunteerProfile({
+    required this.id,
+    required this.district,
+    required this.emergencyContactName,
+    required this.emergencyContactPhone,
+    required this.isActive,
+    required this.maxHoursPerWeek,
+    this.notes,
+    required this.skills,
+    required this.availabilities,
+    required this.activeAssignmentsCount,
+  });
+
+  final String id;
+  final String district;
+  final String emergencyContactName;
+  final String emergencyContactPhone;
+  final bool isActive;
+  final int maxHoursPerWeek;
+  final String? notes;
+  final List<VolunteerSkillModel> skills;
+  final List<VolunteerAvailabilityModel> availabilities;
+  final int activeAssignmentsCount;
+
+  factory VolunteerProfile.fromJson(Map<String, dynamic> json) => VolunteerProfile(
+        id: json['id'] as String,
+        district: json['district'] as String,
+        emergencyContactName: json['emergencyContactName'] as String,
+        emergencyContactPhone: json['emergencyContactPhone'] as String,
+        isActive: json['isActive'] as bool,
+        maxHoursPerWeek: (json['maxHoursPerWeek'] as num).toInt(),
+        notes: json['notes'] as String?,
+        skills: (json['skills'] as List<dynamic>?)
+                ?.map((e) => VolunteerSkillModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        availabilities: (json['availabilities'] as List<dynamic>?)
+                ?.map((e) => VolunteerAvailabilityModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        activeAssignmentsCount: (json['activeAssignmentsCount'] as num?)?.toInt() ?? 0,
+      );
+}
+
+class VolunteerAssignmentModel {
+  const VolunteerAssignmentModel({
+    required this.id,
+    required this.volunteerId,
+    required this.volunteerName,
+    this.reliefRequestId,
+    required this.startTime,
+    required this.endTime,
+    required this.status,
+    this.roleOrTask,
+    this.notes,
+  });
+
+  final String id;
+  final String volunteerId;
+  final String volunteerName;
+  final String? reliefRequestId;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String status;
+  final String? roleOrTask;
+  final String? notes;
+
+  factory VolunteerAssignmentModel.fromJson(Map<String, dynamic> json) => VolunteerAssignmentModel(
+        id: json['id'] as String,
+        volunteerId: json['volunteerId'] as String,
+        volunteerName: json['volunteerName'] as String,
+        reliefRequestId: json['reliefRequestId'] as String?,
+        startTime: DateTime.parse(json['startTime'] as String).toUtc(),
+        endTime: DateTime.parse(json['endTime'] as String).toUtc(),
+        status: json['status'] as String,
+        roleOrTask: json['roleOrTask'] as String?,
+        notes: json['notes'] as String?,
+      );
+
+  bool get canStart => status == 'Assigned';
+  bool get canComplete => status == 'InProgress';
+  bool get canCancel => status == 'Assigned' || status == 'InProgress';
+}
+

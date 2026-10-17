@@ -40,6 +40,67 @@ Map<String, dynamic> authJson({String role = 'Citizen'}) => {
 Map<String, dynamic> pagedJson(List<Map<String, dynamic>> items) =>
     {'items': items, 'page': 1, 'pageSize': 30, 'totalCount': items.length, 'totalPages': 1};
 
+Map<String, dynamic> volunteerProfileJson({
+  String id = 'v1',
+  String district = 'Colombo',
+  String emergencyContactName = 'Kamala Fernando',
+  String emergencyContactPhone = '0779988776',
+  bool isActive = true,
+  int maxHoursPerWeek = 30,
+  String? notes = 'Field responder with 4x4',
+}) =>
+    {
+      'id': id,
+      'district': district,
+      'emergencyContactName': emergencyContactName,
+      'emergencyContactPhone': emergencyContactPhone,
+      'isActive': isActive,
+      'maxHoursPerWeek': maxHoursPerWeek,
+      'notes': notes,
+      'skills': [
+        {
+          'id': 's1',
+          'skill': 'FirstAid',
+          'proficiency': 'Advanced',
+          'certificateReference': 'SLRC-FA-2025',
+          'isVerified': true,
+        },
+      ],
+      'availabilities': [
+        {
+          'id': 'a1',
+          'type': 'RecurringWeekly',
+          'dayOfWeek': 'Monday',
+          'startTime': '08:00:00',
+          'endTime': '16:00:00',
+          'specificStartUtc': null,
+          'specificEndUtc': null,
+        },
+      ],
+      'activeAssignmentsCount': 1,
+    };
+
+Map<String, dynamic> volunteerAssignmentJson({
+  String id = 'asg-1',
+  String volunteerId = 'v1',
+  String volunteerName = 'Sunil Fernando',
+  String? reliefRequestId = 'r1',
+  String status = 'Assigned',
+  String roleOrTask = 'First Aid Response',
+  String? notes = 'Report to Kelaniya staging',
+}) =>
+    {
+      'id': id,
+      'volunteerId': volunteerId,
+      'volunteerName': volunteerName,
+      'reliefRequestId': reliefRequestId,
+      'startTime': '2026-10-20T08:00:00Z',
+      'endTime': '2026-10-20T14:00:00Z',
+      'status': status,
+      'roleOrTask': roleOrTask,
+      'notes': notes,
+    };
+
 class Recorded {
   Recorded(this.method, this.path, this.query, this.body, this.headers);
   final String method;

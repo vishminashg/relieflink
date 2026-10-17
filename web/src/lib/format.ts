@@ -32,3 +32,39 @@ export const DISTRICTS = [
   "Kalutara", "Kandy", "Kegalle", "Kilinochchi", "Kurunegala", "Mannar", "Matale", "Matara", "Monaragala",
   "Mullaitivu", "Nuwara Eliya", "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya",
 ];
+
+export const VOLUNTEER_SKILLS = [
+  "FirstAid",
+  "Medical",
+  "SearchAndRescue",
+  "BoatOperation",
+  "HeavyVehicleDriving",
+  "FoodDistribution",
+  "ChildCare",
+  "ElderlyCare",
+] as const;
+
+export const SKILL_LABELS: Record<string, string> = {
+  FirstAid: "First Aid",
+  Medical: "Medical Response",
+  SearchAndRescue: "Search & Rescue",
+  BoatOperation: "Boat Operation",
+  HeavyVehicleDriving: "Heavy Vehicle Driving",
+  FoodDistribution: "Food Distribution",
+  ChildCare: "Child Care",
+  ElderlyCare: "Elderly Care",
+};
+
+export function skillLabel(skill: string): string {
+  return SKILL_LABELS[skill] ?? skill;
+}
+
+export function qualityClass(quality: string): string {
+  switch (quality.toLowerCase()) {
+    case "excellent": return "quality-excellent";
+    case "good": return "quality-good";
+    case "adequate": return "quality-adequate";
+    default: return "quality-low";
+  }
+}
+

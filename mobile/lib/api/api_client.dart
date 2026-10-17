@@ -115,4 +115,33 @@ class ApiClient {
   Future<ReliefRequest> cancelRequest(String id, String? reason) async => ReliefRequest.fromJson(await _send(
       'POST', '/api/relief-requests/$id/cancel',
       body: {'reason': (reason == null || reason.trim().isEmpty) ? null : reason.trim()}) as Map<String, dynamic>);
+
+  // ==========================================
+  // Component C: Volunteer Operations
+  // ==========================================
+
+  Future<VolunteerProfile> myVolunteerProfile() async =>
+      VolunteerProfile.fromJson(await _send('GET', '/api/volunteers/me') as Map<String, dynamic>);
+
+  Future<VolunteerProfile> updateVolunteerProfile(String id, Map<String, dynamic> body) async =>
+      VolunteerProfile.fromJson(await _send('PUT', '/api/volunteers/$id', body: body) as Map<String, dynamic>);
+
+  Future<VolunteerProfile> updateVolunteerSkills(String id, List<Map<String, dynamic>> skills) async =>
+      VolunteerProfile.fromJson(await _send('PUT', '/api/volunteers/$id/skills', body: {'skills': skills}) as Map<String, dynamic>);
+
+  Future<VolunteerProfile> updateVolunteerAvailability(String id, List<Map<String, dynamic>> availabilities) async =>
+      VolunteerProfile.fromJson(await _send('PUT', '/api/volunteers/$id/availability', body: {'availabilities': availabilities}) as Map<String, dynamic>);
+
+  Future<List<VolunteerAssignmentModel>> myAssignments() async {
+    final list = await _send('GET', '/api/assignments/my') as List<dynamic>;
+    return list.map((e) => VolunteerAssignmentModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<VolunteerAssignmentModel> updateAssignmentStatus(String id, String status, {String? notes}) async =>
+      VolunteerAssignmentModel.fromJson(await _send('PATCH', '/api/assignments/$id/status',
+          body: {'status': status, if (notes != null) 'notes': notes}) as Map<String, dynamic>);
+
+  Future<VolunteerAssignmentModel> cancelAssignment(String id, String? reason) async =>
+      VolunteerAssignmentModel.fromJson(await _send('POST', '/api/assignments/$id/cancel',
+          body: {'reason': reason}) as Map<String, dynamic>);
 }

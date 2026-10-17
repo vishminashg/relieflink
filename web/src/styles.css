@@ -211,3 +211,22 @@ input[type="checkbox"] { width: 1.15rem; height: 1.15rem; min-height: 0; margin:
   .row-plain { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Component C: Volunteers, Assignments & Matching */
+.pill.status-assigned { background: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
+.pill.status-inprogress { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+.pill.status-completed { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+.pill.status-cancelled { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+
+.quality-tag { display: inline-block; font-weight: 700; font-size: 0.85rem; padding: 0.15rem 0.6rem; border-radius: 4px; }
+.quality-excellent { background: #2f7d32; color: #fff; }
+.quality-good { background: #0f6f7c; color: #fff; }
+.quality-adequate { background: #b85c0a; color: #fff; }
+.quality-low { background: #b3261e; color: #fff; }
+
+.badge-verified { display: inline-flex; align-items: center; gap: 0.2rem; background: #dcefdc; color: #1d4a1d; border: 1px solid #a5cfa5; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 99px; font-weight: 600; }
+.badge-unverified { display: inline-flex; align-items: center; gap: 0.2rem; background: #fff0cc; color: #5a4200; border: 1px solid #e3c466; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 99px; font-weight: 600; }
+
+.conflict-alert { background: #fdeceb; border-left: 4px solid var(--critical); padding: 0.6rem 0.8rem; border-radius: 4px; color: #6b1510; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem; }
+.available-badge { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+

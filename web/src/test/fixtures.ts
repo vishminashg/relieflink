@@ -1,4 +1,12 @@
-import type { ReliefRequest, WorkflowDetail, WorkflowStatus } from "../api/types";
+import type {
+  ReliefRequest,
+  Volunteer,
+  VolunteerAssignment,
+  VolunteerMatchResult,
+  VolunteerSummary,
+  WorkflowDetail,
+  WorkflowStatus,
+} from "../api/types";
 
 export function makeRequest(over: Partial<ReliefRequest> = {}): ReliefRequest {
   return {
@@ -37,6 +45,76 @@ export function makeWorkflow(status: WorkflowStatus, over: Partial<WorkflowDetai
       { attempt: 2, checkName: "needs-covered", passed: true, detail: null },
     ],
     decisions: [], ...over,
+  };
+}
+
+export function makeVolunteer(over: Partial<Volunteer> = {}): Volunteer {
+  return {
+    id: "v1",
+    user: { id: "u2", fullName: "Sunil Fernando", email: "sunil@relief.lk", phone: "0712345678" },
+    district: "Colombo",
+    emergencyContactName: "Kamala Fernando",
+    emergencyContactPhone: "0779988776",
+    isActive: true,
+    maxHoursPerWeek: 30,
+    notes: "Experienced first responder with 4x4",
+    skills: [
+      { id: "s1", skill: "FirstAid", proficiency: "Advanced", certificateReference: "SLRC-FA-2025", isVerified: true },
+      { id: "s2", skill: "SearchAndRescue", proficiency: "Intermediate", certificateReference: null, isVerified: false },
+    ],
+    availabilities: [
+      { id: "a1", type: "RecurringWeekly", dayOfWeek: "Monday", startTime: "08:00:00", endTime: "16:00:00", specificStartUtc: null, specificEndUtc: null },
+    ],
+    activeAssignmentsCount: 0,
+    createdAt: "2026-10-10T10:00:00Z",
+    updatedAt: "2026-10-10T10:00:00Z",
+    ...over,
+  };
+}
+
+export function makeAssignment(over: Partial<VolunteerAssignment> = {}): VolunteerAssignment {
+  return {
+    id: "asg-1",
+    volunteerId: "v1",
+    volunteerName: "Sunil Fernando",
+    reliefRequestId: "r1",
+    startTime: "2026-10-20T08:00:00Z",
+    endTime: "2026-10-20T14:00:00Z",
+    status: "Assigned",
+    roleOrTask: "First Aid & Medical Evacuation",
+    notes: "Report to Kelaniya depot",
+    createdByUserId: "s1",
+    createdAt: "2026-10-18T09:00:00Z",
+    updatedAt: "2026-10-18T09:00:00Z",
+    ...over,
+  };
+}
+
+export function makeMatchResult(over: Partial<VolunteerMatchResult> = {}): VolunteerMatchResult {
+  return {
+    volunteer: makeVolunteer(),
+    score: 85,
+    quality: "Good",
+    isEligible: true,
+    hasScheduleConflict: false,
+    hasAvailability: true,
+    reasons: ["Exact district match (+30)", "Has certified skills: FirstAid (+40)"],
+    matchedSkills: ["FirstAid"],
+    missingSkills: [],
+    ...over,
+  };
+}
+
+export function makeVolunteerSummary(over: Partial<VolunteerSummary> = {}): VolunteerSummary {
+  return {
+    totalVolunteers: 45,
+    activeVolunteers: 38,
+    currentlyAssignedVolunteers: 12,
+    availableVolunteers: 26,
+    byDistrict: { Colombo: 20, Gampaha: 15, Kalutara: 10 },
+    bySkill: { FirstAid: 25, SearchAndRescue: 12, BoatOperation: 6 },
+    assignmentsByStatus: { Assigned: 4, InProgress: 8, Completed: 30, Cancelled: 3 },
+    ...over,
   };
 }
 

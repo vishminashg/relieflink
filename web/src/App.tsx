@@ -5,6 +5,9 @@ import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { RequestDetail } from "./pages/RequestDetail";
 import { Requests } from "./pages/Requests";
+import { VolunteerDetail } from "./pages/VolunteerDetail";
+import { VolunteerMatch } from "./pages/VolunteerMatch";
+import { Volunteers } from "./pages/Volunteers";
 import { WorkflowDetail } from "./pages/WorkflowDetail";
 import { Workflows } from "./pages/Workflows";
 
@@ -24,6 +27,9 @@ export function App() {
           <Route index element={<Dashboard />} />
           <Route path="requests" element={<Requests />} />
           <Route path="requests/:id" element={<RequestDetail />} />
+          <Route path="volunteers" element={<Volunteers />} />
+          <Route path="volunteers/:id" element={<VolunteerDetail />} />
+          <Route path="volunteers/match" element={<VolunteerMatch />} />
           <Route path="workflows" element={<Workflows />} />
           <Route path="workflows/:id" element={<WorkflowDetail />} />
         </Route>

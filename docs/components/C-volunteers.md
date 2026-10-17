@@ -1,8 +1,14 @@
 # Component C: Volunteer Management and Matching Agent
 
-Owner: Student 3 (Nagahawatta H.D. · GitHub: `Hasindu-Dilshan`) · Branch: `feature/volunteers`
+- Student: Nagahawatta H.D.
+- GitHub: `Hasindu-Dilshan`
+- Component: C. Volunteer Management
+- Agent: Volunteer Matching Agent
+- Branch: `feature/volunteers`
+- I have read the scope and design document: yes
 
 ---
+
 
 ## 1. What this component does
 During natural disasters in Sri Lanka (such as floods and landslides in Kalutara, Gampaha, Ratnapura, and Kegalle), volunteer response is crucial but frequently chaotic. Volunteers with critical skills (such as boat operation, first aid, or medical assistance) are either under-utilized, dispatched to locations where they cannot help, or double-booked across competing relief tasks.

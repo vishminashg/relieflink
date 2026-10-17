@@ -13,6 +13,8 @@ export function Layout() {
         <nav className="nav" aria-label="Main">
           <NavLink to="/" end>Overview</NavLink>
           <NavLink to="/requests">Requests</NavLink>
+          <NavLink to="/volunteers">Volunteers</NavLink>
+          <NavLink to="/volunteers/match">Match &amp; Dispatch</NavLink>
           <NavLink to="/workflows">AI plans</NavLink>
         </nav>
         <div className="rail-user">
