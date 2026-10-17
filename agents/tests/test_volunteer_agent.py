@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -66,7 +66,7 @@ def test_volunteer_agent_runs_graph_and_returns_proposal_with_tool_calls():
         district="Kalutara",
         required_skills=["BoatOperation"],
         start_time=NOW,
-        end_time=NOW,
+        end_time=NOW + timedelta(hours=4),
         volunteers_needed=1,
         candidates=[c1, c2],
     )
@@ -94,7 +94,7 @@ def test_api_match_volunteers_endpoint_requires_service_key():
         "district": "Kalutara",
         "requiredSkills": ["BoatOperation"],
         "startTime": NOW.isoformat(),
-        "endTime": NOW.isoformat(),
+        "endTime": (NOW + timedelta(hours=4)).isoformat(),
         "volunteersNeeded": 1,
         "candidates": [{"id": "vol-1", "district": "Kalutara", "skills": ["BoatOperation"]}],
     }
