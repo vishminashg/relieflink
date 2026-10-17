@@ -15,6 +15,7 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ValidationError
 
+from .gemini_call import MAX_OUTPUT_TOKENS, call_with_retry, describe_empty, describe_error
 from .schemas import Plan, PlanNeedLine, VolunteerProposal
 from .tools import NEED_PRIORITY
 
@@ -129,7 +130,7 @@ class _Draft(BaseModel):
     target_response_hours: int
     needs: list[_DraftLine]
     rationale: list[str]
-    risks: list[str] = []
+    risks: list[str]
 
 
 SYSTEM_INSTRUCTION = """You are the Planner agent of ReliefLink, a disaster relief coordination system in Sri Lanka.
@@ -182,7 +183,8 @@ class GeminiLLM:
         try:
             from google.genai import types
 
-            response = self._client.models.generate_content(
+            response = call_with_retry(
+                self._client.models.generate_content,
                 model=self._model,
                 contents=self.build_prompt(context),
                 config=types.GenerateContentConfig(
@@ -190,14 +192,17 @@ class GeminiLLM:
                     response_mime_type="application/json",
                     response_schema=_Draft,
                     temperature=0.2,
-                    max_output_tokens=1200,
+                    max_output_tokens=MAX_OUTPUT_TOKENS,
                 ),
             )
-            return self.parse(response.text)
+            try:
+                return self.parse(response.text)
+            except LLMError as exc:
+                raise LLMError(f"{exc}{describe_empty(response)}") from exc
         except LLMError:
             raise
         except Exception as exc:  # network, quota, safety block, anything
-            raise LLMError(f"Gemini call failed: {type(exc).__name__}") from exc
+            raise LLMError(f"Gemini call failed: {describe_error(exc)}") from exc
 
     @staticmethod
     def parse(text: str | None) -> Plan:

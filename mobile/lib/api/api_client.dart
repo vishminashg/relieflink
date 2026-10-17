@@ -22,7 +22,7 @@ class ApiException implements Exception {
 
 /// Talks to the ReliefLink API. Knows nothing about screens.
 class ApiClient {
-  ApiClient({required this.baseUrl, http.Client? client, this.timeout = const Duration(seconds: 20)})
+  ApiClient({required this.baseUrl, http.Client? client, this.timeout = const Duration(seconds: 60)})
       : _http = client ?? http.Client();
 
   final String baseUrl;

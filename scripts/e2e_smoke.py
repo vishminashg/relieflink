@@ -3,7 +3,7 @@
 End-to-end smoke test of the real system: API + agent service + database (standard library only).
 
 Start the API and the agent service first, then:
-    python scripts/e2e_smoke.py --api http://localhost:5080 --password <Seed__DemoPassword>
+    python scripts/e2e_smoke.py --api http://localhost:5039 --password <Seed__DemoPassword>
 
 It signs in as the seeded demo citizen and coordinator, files a relief request, starts the AI workflow and prints
 what happened. Use --expect to say what you expect to see, for example when you start the agent service with a
@@ -40,7 +40,7 @@ def login(api, email, password):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--api", default="http://localhost:5080")
+    ap.add_argument("--api", default="http://localhost:5039")
     ap.add_argument("--password", required=True, help="the Seed__DemoPassword you started the API with")
     ap.add_argument("--expect", default="PendingCoordinatorApproval")
     ap.add_argument("--approve", action="store_true")

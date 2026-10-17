@@ -17,7 +17,7 @@ if (string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
     throw new InvalidOperationException(
         "Jwt:Key is missing or shorter than 32 characters. Set the Jwt__Key environment variable.");
 
-var connectionString = builder.Configuration.GetConnectionString("Default")
+var connectionString = ConnectionStringNormalizer.Normalize(builder.Configuration.GetConnectionString("Default"))
     ?? throw new InvalidOperationException(
         "ConnectionStrings:Default is not set. Set the ConnectionStrings__Default environment variable.");
 
