@@ -438,6 +438,212 @@ namespace ReliefLink.Api.Data.Migrations
                     b.ToTable("ValidationResults", (string)null);
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.Volunteer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("EmergencyContactName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("EmergencyContactPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxHoursPerWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("District");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Volunteers", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Volunteers_MaxHoursPerWeek", "\"MaxHoursPerWeek\" BETWEEN 1 AND 168");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid?>("ReliefRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RoleOrTask")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VolunteerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ReliefRequestId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("VolunteerId");
+
+                    b.HasIndex("StartTime", "EndTime");
+
+                    b.ToTable("VolunteerAssignments", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_VolunteerAssignments_TimeOrder", "\"EndTime\" > \"StartTime\"");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerAvailability", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<DateTime?>("SpecificEndUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("SpecificStartUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<TimeOnly?>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VolunteerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VolunteerId", "DayOfWeek");
+
+                    b.HasIndex("VolunteerId", "SpecificStartUtc", "SpecificEndUtc");
+
+                    b.ToTable("VolunteerAvailabilities", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_VolunteerAvailabilities_DateOrder", "\"SpecificEndUtc\" IS NULL OR \"SpecificStartUtc\" IS NULL OR \"SpecificEndUtc\" > \"SpecificStartUtc\"");
+
+                            t.HasCheckConstraint("CK_VolunteerAvailabilities_TimeOrder", "\"EndTime\" IS NULL OR \"StartTime\" IS NULL OR \"EndTime\" > \"StartTime\"");
+                        });
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CertificateReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Proficiency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Skill")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VolunteerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VolunteerId", "Skill")
+                        .IsUnique();
+
+                    b.ToTable("VolunteerSkills", (string)null);
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.WorkflowStep", b =>
                 {
                     b.Property<Guid>("Id")
@@ -576,6 +782,65 @@ namespace ReliefLink.Api.Data.Migrations
                     b.Navigation("Workflow");
                 });
 
+            modelBuilder.Entity("ReliefLink.Api.Domain.Volunteer", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerAssignment", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ReliefLink.Api.Domain.ReliefRequest", "ReliefRequest")
+                        .WithMany()
+                        .HasForeignKey("ReliefRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ReliefLink.Api.Domain.Volunteer", "Volunteer")
+                        .WithMany("Assignments")
+                        .HasForeignKey("VolunteerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ReliefRequest");
+
+                    b.Navigation("Volunteer");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerAvailability", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.Volunteer", "Volunteer")
+                        .WithMany("Availabilities")
+                        .HasForeignKey("VolunteerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Volunteer");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.VolunteerSkill", b =>
+                {
+                    b.HasOne("ReliefLink.Api.Domain.Volunteer", "Volunteer")
+                        .WithMany("Skills")
+                        .HasForeignKey("VolunteerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Volunteer");
+                });
+
             modelBuilder.Entity("ReliefLink.Api.Domain.WorkflowStep", b =>
                 {
                     b.HasOne("ReliefLink.Api.Domain.AgentWorkflow", "Workflow")
@@ -599,6 +864,15 @@ namespace ReliefLink.Api.Data.Migrations
             modelBuilder.Entity("ReliefLink.Api.Domain.ReliefRequest", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("ReliefLink.Api.Domain.Volunteer", b =>
+                {
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Availabilities");
+
+                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("ReliefLink.Api.Domain.WorkflowStep", b =>

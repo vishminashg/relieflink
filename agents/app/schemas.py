@@ -70,3 +70,38 @@ class ToolCallRecord(Wire):
 class PlannerResponse(Wire):
     plan: Plan
     tool_calls: list[ToolCallRecord]
+
+
+# Component C: Volunteer Matching Agent
+class VolunteerCandidate(Wire):
+    id: str
+    name: str = ""
+    district: str
+    skills: list[str] = Field(default_factory=list)
+    is_verified: bool = False
+    completed_assignments: int = 0
+
+
+class VolunteerMatchingInput(Wire):
+    request_id: str
+    district: str
+    required_skills: list[str] = Field(default_factory=list)
+    start_time: datetime
+    end_time: datetime
+    volunteers_needed: int = Field(ge=1, le=20)
+    candidates: list[VolunteerCandidate] = Field(default_factory=list)
+    notes: str | None = None
+    attempt: int = Field(default=1, ge=1, le=10)
+
+
+class VolunteerProposal(Wire):
+    volunteer_ids: list[str]
+    skills_covered: list[str]
+    summary: str
+    rationale: list[str] = Field(default_factory=list)
+
+
+class VolunteerAgentResponse(Wire):
+    proposal: VolunteerProposal
+    tool_calls: list[ToolCallRecord]
+
